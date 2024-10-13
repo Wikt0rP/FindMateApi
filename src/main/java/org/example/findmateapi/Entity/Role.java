@@ -3,15 +3,18 @@ package org.example.findmateapi.Entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
-@Entity
-public class SteamProfile {
+import java.util.Set;
 
+@Entity
+public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(mappedBy = "steamProfile")
-    @JsonBackReference
-    private User user;
+    @Enumerated(EnumType.STRING)
+    private ERole name;
 
+    @ManyToMany(mappedBy = "roles")
+    @JsonBackReference
+    private Set<User> users;
 }
