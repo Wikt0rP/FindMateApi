@@ -14,4 +14,6 @@ public class SteamProfile {
     @JsonBackReference
     private User user;
 
+    private String steamId;
+
 }

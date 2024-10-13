@@ -14,7 +14,4 @@ public class Role {
     @Enumerated(EnumType.STRING)
     private ERole name;
 
-    @ManyToMany(mappedBy = "roles")
-    @JsonBackReference
-    private Set<User> users;
 }
