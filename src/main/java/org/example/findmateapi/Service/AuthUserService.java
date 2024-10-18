@@ -1,6 +1,9 @@
 package org.example.findmateapi.Service;
 
+import org.example.findmateapi.Entity.ERole;
+import org.example.findmateapi.Entity.Role;
 import org.example.findmateapi.Entity.User;
+import org.example.findmateapi.Repository.RoleRepository;
 import org.example.findmateapi.Repository.UserRepository;
 import org.example.findmateapi.Request.RegisterRequest;
 import org.example.findmateapi.Security.Config.PasswordEncoderConfig;
@@ -11,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class AuthUserService {
@@ -27,22 +32,30 @@ public class AuthUserService {
     private AuthenticationManager authenticationManager;
     @Autowired
     private JwtUtils jwtUtils;
+    @Autowired
+    private RoleRepository roleRepository;
 
     /**
      * If validations are successful, register user.
      * @return ResponseEntity with message
      */
     public ResponseEntity<?> registerUser(RegisterRequest registerRequest){
-        if(registerValidations(registerRequest).getStatusCode().is4xxClientError()){
-            return registerValidations(registerRequest);
+
+        ResponseEntity<?> validationResponse = registerValidations(registerRequest);
+        if(validationResponse.getStatusCode().is4xxClientError()){
+            return validationResponse;
         }
         if(userRepository.existsByUsername(registerRequest.getUsername())){
             return ResponseEntity.badRequest().body("Username already exists");
         }
 
+        Role role = roleRepository.findByName(ERole.ROLE_USER)
+                .orElseGet(() -> roleRepository.save(new Role(ERole.ROLE_USER)));
+
         User user = new User(registerRequest.getUsername(), registerRequest.getEmail(),
-                passwordEncoder.passwordEncoder().encode(registerRequest.getPassword()));
+        passwordEncoder.passwordEncoder().encode(registerRequest.getPassword()), role);
         userRepository.save(user);
+
         return ResponseEntity.ok("User registered successfully");
     }
 
@@ -68,4 +81,6 @@ public class AuthUserService {
         }
         return ResponseEntity.ok("Validations successful");
     }
+
+
 }
