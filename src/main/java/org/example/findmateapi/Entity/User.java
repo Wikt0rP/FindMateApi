@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -64,18 +65,20 @@ public class User {
     @JsonManagedReference
     private SportProfile sportProfile;
 
-    public User(String username, String email, String password) {
+    public User(String username, String email, String password, Role role) {
         this.username = username;
         this.email = email;
         this.password = password;
         isActive = false;
+        roles.add(role);
     }
-    public User(String username, String email, String googleId, boolean isGoogleUser) {
+    public User(String username, String email, String googleId, boolean isGoogleUser, Role role) {
         this.username = username;
         this.email = email;
         this.googleId = googleId;
         this.isGoogleUser = isGoogleUser;
         isActive = false;
+        roles.add(role);
     }
 
 }
