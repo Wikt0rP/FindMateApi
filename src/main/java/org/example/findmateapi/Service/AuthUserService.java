@@ -5,17 +5,28 @@ import org.example.findmateapi.Entity.Role;
 import org.example.findmateapi.Entity.User;
 import org.example.findmateapi.Repository.RoleRepository;
 import org.example.findmateapi.Repository.UserRepository;
+import org.example.findmateapi.Request.LoginRequest;
 import org.example.findmateapi.Request.RegisterRequest;
+import org.example.findmateapi.Response.JwtResponse;
 import org.example.findmateapi.Security.Config.PasswordEncoderConfig;
+import org.example.findmateapi.Security.Impl.UserDetailsImpl;
 import org.example.findmateapi.Security.Jwt.JwtUtils;
 import org.example.findmateapi.Validation.EmailValidation;
 import org.example.findmateapi.Validation.PasswordValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthUserService {
@@ -58,6 +69,28 @@ public class AuthUserService {
 
         return ResponseEntity.ok("User registered successfully");
     }
+
+    //TODO: tests
+    public ResponseEntity<?> loginUser(LoginRequest loginRequest){
+        try{
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            Set<Role> roles = userDetails.getAuthorities().stream()
+                    .map(authority -> {
+                        String roleName = authority.getAuthority();
+                        ERole role = ERole.valueOf(roleName);
+                        return new Role(role);
+                    }).collect(Collectors.toSet());
+            return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("Invalid credentials");
+        }
+    }
+
+
+
 
     /**
      *  Validates email, password, username and checks if username already exists
