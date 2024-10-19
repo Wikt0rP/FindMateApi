@@ -1,5 +1,6 @@
 package org.example.findmateapi.Controller;
 
+import org.example.findmateapi.Request.LoginRequest;
 import org.example.findmateapi.Request.RegisterRequest;
 import org.example.findmateapi.Service.AuthUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,5 +17,10 @@ public class AuthControler {
     @PostMapping("/register")
     public ResponseEntity<?> userRegister(@RequestBody RegisterRequest registerRequest){
         return authUserService.registerUser(registerRequest);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> userLogin(@RequestBody LoginRequest loginRequest){
+        return authUserService.loginUser(loginRequest);
     }
 }
