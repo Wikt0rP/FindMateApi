@@ -1,11 +1,12 @@
 package org.example.findmateapi.Entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-
-import java.util.Set;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Getter
+@NoArgsConstructor
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -13,5 +14,10 @@ public class Role {
 
     @Enumerated(EnumType.STRING)
     private ERole name;
+
+
+    public Role(ERole roleUser){
+        this.name = roleUser;
+    }
 
 }
