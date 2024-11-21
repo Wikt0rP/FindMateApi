@@ -11,6 +11,7 @@ import org.example.findmateapi.Response.JwtResponse;
 import org.example.findmateapi.Security.Config.PasswordEncoderConfig;
 import org.example.findmateapi.Security.Impl.UserDetailsImpl;
 import org.example.findmateapi.Security.Jwt.JwtUtils;
+import org.example.findmateapi.Service.Google.GmailAuth;
 import org.example.findmateapi.Validation.EmailValidation;
 import org.example.findmateapi.Validation.PasswordValidation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ public class AuthUserService {
     @Autowired
     private RoleRepository roleRepository;
 
+
     /**
      * If validations are successful, register user.
      * @return ResponseEntity with message
@@ -66,7 +68,9 @@ public class AuthUserService {
         User user = new User(registerRequest.getUsername(), registerRequest.getEmail(),
         passwordEncoder.passwordEncoder().encode(registerRequest.getPassword()), role);
         userRepository.save(user);
-
+        GmailAuth.sendEmail(registerRequest.getEmail(),
+                "Welcome to FindMate",
+                "You have successfully registered to FindMate");
         return ResponseEntity.ok("User registered successfully");
     }
 
