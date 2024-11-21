@@ -3,7 +3,9 @@ package org.example.findmateapi.Entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,21 +13,23 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@NoArgsConstructor
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
+    private String username;
 
     @Column(unique = true)
-
     private String email;
 
     private String password;
 
     private String googleId;
+
+    private boolean isGoogleUser;
 
     private boolean isActive;
 
@@ -60,4 +64,21 @@ public class User {
     @JoinColumn(name = "sport_profile_id", referencedColumnName = "id")
     @JsonManagedReference
     private SportProfile sportProfile;
+
+    public User(String username, String email, String password, Role role) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        isActive = false;
+        roles.add(role);
+    }
+    public User(String username, String email, String googleId, boolean isGoogleUser, Role role) {
+        this.username = username;
+        this.email = email;
+        this.googleId = googleId;
+        this.isGoogleUser = isGoogleUser;
+        isActive = false;
+        roles.add(role);
+    }
+
 }
