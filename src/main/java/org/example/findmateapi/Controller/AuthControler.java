@@ -27,6 +27,6 @@ public class AuthControler {
 
     @PostMapping("/activate")
     public ResponseEntity<?> activateUser(@RequestBody String code, HttpServletRequest request){
-        return authUserService.activateUserAfterLogin(code, request);
+        return authUserService.confirmOperationAfterLogin(code, request);
     }
 }
