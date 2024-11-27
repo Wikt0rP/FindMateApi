@@ -92,7 +92,7 @@ public class AuthUserService {
         }
     }
 
-    public ResponseEntity<?> activateUserAfterLogin(String confirmationCode, HttpServletRequest request){
+    public ResponseEntity<?> confirmOperationAfterLogin(String confirmationCode, HttpServletRequest request){
         String token = JwtUtils.getJwtFromRequest(request);
         User user = getUserFromToken(token);
 
