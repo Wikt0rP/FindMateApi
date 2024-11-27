@@ -8,6 +8,7 @@ import org.example.findmateapi.Repository.RoleRepository;
 import org.example.findmateapi.Repository.UserRepository;
 import org.example.findmateapi.Request.LoginRequest;
 import org.example.findmateapi.Request.RegisterRequest;
+import org.example.findmateapi.Request.ResetPasswordRequest;
 import org.example.findmateapi.Response.JwtResponse;
 import org.example.findmateapi.Security.Config.PasswordEncoderConfig;
 import org.example.findmateapi.Security.Impl.UserDetailsImpl;
@@ -122,6 +123,42 @@ public class AuthUserService {
         }else{
             return ResponseEntity.badRequest().body("Invalid confirmation code");
         }
+    }
+
+    public ResponseEntity<?> forgotPassword(String email){
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if(userOptional.isEmpty()){
+            return ResponseEntity.badRequest().body("User not found");
+        }
+        User user = userOptional.get();
+        user.setConfirmationCode(generateConfirmationCode());
+        userRepository.save(user);
+        sendConfirmationCodeMail(user.getEmail(), user);
+        return ResponseEntity.ok("Confirmation code sent to email");
+    }
+
+    /**
+     * Changes password if user is found by email and confirmation code is correct. Password must be valid at password strength 3
+     * @param resetPasswordRequest ResetPasswordRequest object
+     * @return ResponseEntity with message
+     */
+    public ResponseEntity<?> changePassword(ResetPasswordRequest resetPasswordRequest){
+        Optional<User> userOptional = userRepository.findByEmail(resetPasswordRequest.getEmail());
+        if(userOptional.isEmpty()){
+            return ResponseEntity.badRequest().body("Invalid confirmation code");
+        }
+        User user = userOptional.get();
+
+        if(!passwordValidation.isValidPassword(resetPasswordRequest.getNewPassword(), user.getUsername(), 3)){
+            return ResponseEntity.badRequest().body("Invalid password");
+        }
+        else{
+            user.setPassword(passwordEncoder.passwordEncoder().encode(resetPasswordRequest.getNewPassword()));
+            user.setConfirmationCode(null);
+            userRepository.save(user);
+            return ResponseEntity.ok("Password changed successfully");
+        }
+
     }
 
 //    public ResponseEntity<?> confirmOperationByEmail(String email, String confirmationCode){
