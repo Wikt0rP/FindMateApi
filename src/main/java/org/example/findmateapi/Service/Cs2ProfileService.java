@@ -41,6 +41,7 @@ public class Cs2ProfileService {
         String token = getJwtFromRequest(request);
         if(token == null || !jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+
         }else{
             User user = getUserFromToken(token);
             if(user != null){
@@ -49,7 +50,9 @@ public class Cs2ProfileService {
                     cs2ProfileRepository.save(cs2Profile);
                     user.setCs2Profile(cs2Profile);
                     userRepository.save(user);
+
                     return ResponseEntity.status(HttpStatus.CREATED).body("Cs2 Profile created successfully");
+
                 } catch (Exception e) {
                     logger.error("Error creating Cs2 Profile", e);
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating Cs2 Profile");
