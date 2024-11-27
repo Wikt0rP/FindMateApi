@@ -31,15 +31,19 @@ public class Cs2ProfileService {
     private JwtUtils jwtUtils;
 
 
+    /**
+     * Creates a new Cs2Profile for the user
+     * @param createCs2ProfileRequest CreateCs2ProfileRequest object - all data needed to create a new Cs2Profile
+     * @param request Auth request
+     * @return ResponseEntity with message
+     */
     public ResponseEntity<String> createCs2Profile(CreateCs2ProfileRequest createCs2ProfileRequest, HttpServletRequest request) {
         String token = getJwtFromRequest(request);
         if(token == null || !jwtUtils.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }else{
-            String username = jwtUtils.extractUsername(token);
-            Optional<User> userOptional = userRepository.findByUsername(username);
-            if(userOptional.isPresent()){
-                User user = userOptional.get();
+            User user = getUserFromToken(token);
+            if(user != null){
                 try {
                     Cs2Profile cs2Profile = new Cs2Profile(user ,createCs2ProfileRequest.getRank());
                     cs2ProfileRepository.save(cs2Profile);
@@ -54,4 +58,10 @@ public class Cs2ProfileService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
     }
+    private User getUserFromToken(String token){
+        String username = jwtUtils.extractUsername(token);
+        return userRepository.findByUsername(username)
+                .orElse(null);
+    }
+
 }
