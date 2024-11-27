@@ -50,7 +50,9 @@ public class AuthUserService {
     Logger logger = LoggerFactory.getLogger(AuthUserService.class);
 
     /**
-     * If validations are successful, register user.
+     * If validations are successful, register user and generates confirmation code and sends email. Account is not active
+     * until user confirms operation!
+     * @param registerRequest RegisterRequest object
      * @return ResponseEntity with message
      */
     public ResponseEntity<?> registerUser(RegisterRequest registerRequest){
@@ -74,6 +76,10 @@ public class AuthUserService {
         return ResponseEntity.ok("User registered successfully");
     }
 
+    /**
+     * Logs in user, generates JWT token
+     * @return ResponseEntity with JWT token
+     */
     public ResponseEntity<?> loginUser(LoginRequest loginRequest){
         try{
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
@@ -92,10 +98,19 @@ public class AuthUserService {
         }
     }
 
+    /**
+     * Confirms operation, user must be logged in
+     * @param confirmationCode 6 char code as String
+     * @param request Auth request
+     * @return ResponseEntity with message
+     */
     public ResponseEntity<?> confirmOperationAfterLogin(String confirmationCode, HttpServletRequest request){
         String token = JwtUtils.getJwtFromRequest(request);
-        User user = getUserFromToken(token);
+        if(token == null || !jwtUtils.validateToken(token)){
+            return ResponseEntity.badRequest().body("Unauthorized");
+        }
 
+        User user = getUserFromToken(token);
         if(user == null){
             return ResponseEntity.badRequest().body("User not found");
         }
