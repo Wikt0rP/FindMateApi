@@ -1,5 +1,6 @@
 package org.example.findmateapi.Controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.example.findmateapi.Request.LoginRequest;
 import org.example.findmateapi.Request.RegisterRequest;
 import org.example.findmateapi.Service.AuthUserService;
@@ -22,5 +23,10 @@ public class AuthControler {
     @PostMapping("/login")
     public ResponseEntity<?> userLogin(@RequestBody LoginRequest loginRequest){
         return authUserService.loginUser(loginRequest);
+    }
+
+    @PostMapping("/activate")
+    public ResponseEntity<?> activateUser(@RequestBody String code, HttpServletRequest request){
+        return authUserService.confirmOperationAfterLogin(code, request);
     }
 }

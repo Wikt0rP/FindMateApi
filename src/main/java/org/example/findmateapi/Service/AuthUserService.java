@@ -1,5 +1,6 @@
 package org.example.findmateapi.Service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.example.findmateapi.Entity.ERole;
 import org.example.findmateapi.Entity.Role;
 import org.example.findmateapi.Entity.User;
@@ -14,6 +15,8 @@ import org.example.findmateapi.Security.Jwt.JwtUtils;
 import org.example.findmateapi.Service.Google.GmailAuth;
 import org.example.findmateapi.Validation.EmailValidation;
 import org.example.findmateapi.Validation.PasswordValidation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,10 +26,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,9 +47,12 @@ public class AuthUserService {
     @Autowired
     private RoleRepository roleRepository;
 
+    Logger logger = LoggerFactory.getLogger(AuthUserService.class);
 
     /**
-     * If validations are successful, register user.
+     * If validations are successful, register user and generates confirmation code and sends email. Account is not active
+     * until user confirms operation!
+     * @param registerRequest RegisterRequest object
      * @return ResponseEntity with message
      */
     public ResponseEntity<?> registerUser(RegisterRequest registerRequest){
@@ -66,15 +69,17 @@ public class AuthUserService {
                 .orElseGet(() -> roleRepository.save(new Role(ERole.ROLE_USER)));
 
         User user = new User(registerRequest.getUsername(), registerRequest.getEmail(),
-        passwordEncoder.passwordEncoder().encode(registerRequest.getPassword()), role);
+                passwordEncoder.passwordEncoder().encode(registerRequest.getPassword()), role);
+        user.setConfirmationCode(generateConfirmationCode());
         userRepository.save(user);
-        GmailAuth.sendEmail(registerRequest.getEmail(),
-                "Welcome to FindMate",
-                "You have successfully registered to FindMate");
+        sendConfirmationCodeMail(user.getEmail(), user);
         return ResponseEntity.ok("User registered successfully");
     }
 
-    //TODO: tests
+    /**
+     * Logs in user, generates JWT token
+     * @return ResponseEntity with JWT token
+     */
     public ResponseEntity<?> loginUser(LoginRequest loginRequest){
         try{
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
@@ -93,8 +98,51 @@ public class AuthUserService {
         }
     }
 
+    /**
+     * Confirms operation, user must be logged in
+     * @param confirmationCode 6 char code as String
+     * @param request Auth request
+     * @return ResponseEntity with message
+     */
+    public ResponseEntity<?> confirmOperationAfterLogin(String confirmationCode, HttpServletRequest request){
+        String token = JwtUtils.getJwtFromRequest(request);
+        if(token == null || !jwtUtils.validateToken(token)){
+            return ResponseEntity.badRequest().body("Unauthorized");
+        }
 
+        User user = getUserFromToken(token);
+        if(user == null){
+            return ResponseEntity.badRequest().body("User not found");
+        }
+        if(user.getConfirmationCode().equals(confirmationCode)){
+            user.setConfirmationCode(null);
+            user.setActive(true);
+            userRepository.save(user);
+            return ResponseEntity.ok("User activated successfully");
+        }else{
+            return ResponseEntity.badRequest().body("Invalid confirmation code");
+        }
+    }
 
+//    public ResponseEntity<?> confirmOperationByEmail(String email, String confirmationCode){
+//        Optional<User> userOptional = userRepository.findByEmail(email);
+//        if(userOptional.isEmpty()){
+//            return ResponseEntity.badRequest().body("User not found");
+//        }
+//        User user = userOptional.get();
+//        if(user.getConfirmationCode().equals(confirmationCode)){
+//            user.setConfirmationCode(null);
+//            userRepository.save(user);
+//            return ResponseEntity.ok("Operation confirmed successfully");
+//        }
+//        return ResponseEntity.badRequest().body("Invalid confirmation code");
+//    }
+
+    private User getUserFromToken(String token){
+        String username = jwtUtils.extractUsername(token);
+        return userRepository.findByUsername(username)
+                .orElse(null);
+    }
 
     /**
      *  Validates email, password, username and checks if username already exists
@@ -119,5 +167,26 @@ public class AuthUserService {
         return ResponseEntity.ok("Validations successful");
     }
 
+    private String generateConfirmationCode(){
+        String base = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        char[] confirmationCode = new char[6];
+        for(int i = 0; i < confirmationCode.length; i++){
+            confirmationCode[i] = base.charAt(random.nextInt(base.length()));
+        }
+
+        return new String(confirmationCode);
+    }
+
+    private void sendConfirmationCodeMail(String email, User user){
+        try {
+            GmailAuth.sendEmail(email, "[FindMate] Confirmation code",
+                    "Your confirmation code is: " + user.getConfirmationCode() + "\n" +
+                            "Enter this code to confirm your operation in FindMate");
+
+        }catch (Exception e){
+            logger.error("Error sending confirmation code email: {}", e.getMessage());
+        }
+    }
 
 }
