@@ -1,6 +1,5 @@
 package org.example.findmateapi.Entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -11,6 +10,6 @@ public class SportProfile {
     private Long id;
 
     @OneToOne(mappedBy = "sportProfile")
-    @JsonBackReference
-    private User user;
+    private UserProfiles userProfiles;
+
 }
