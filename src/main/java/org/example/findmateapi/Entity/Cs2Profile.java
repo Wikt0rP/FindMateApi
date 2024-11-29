@@ -1,9 +1,11 @@
 package org.example.findmateapi.Entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
@@ -15,18 +17,22 @@ public class Cs2Profile {
     private Long id;
 
     @OneToOne(mappedBy = "cs2Profile")
-    @JsonBackReference
-    private User user;
+    private UserProfiles userProfiles;
 
     private Integer primeRank;
 
-    public Cs2Profile(User user, Integer primeRank) {
-        this.user = user;
+    //Last time player was looking to play / created a profile
+    private LocalDateTime lastRefreshed;
+
+    public Cs2Profile(UserProfiles userProfiles, Integer primeRank) {
+        this.userProfiles = userProfiles;
         this.primeRank = primeRank;
+        this.lastRefreshed = LocalDateTime.now();
     }
-    public Cs2Profile(User user){
-        this.user = user;
+    public Cs2Profile(UserProfiles userProfiles){
+        this.userProfiles = userProfiles;
         this.primeRank = 10;//default prime rank
+        this.lastRefreshed = LocalDateTime.now();
     }
 
 }

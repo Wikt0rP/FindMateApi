@@ -1,9 +1,13 @@
 package org.example.findmateapi.Entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class SteamProfile {
 
     @Id
@@ -11,9 +15,11 @@ public class SteamProfile {
     private Long id;
 
     @OneToOne(mappedBy = "steamProfile")
-    @JsonBackReference
-    private User user;
+    private UserProfiles userProfiles;
 
     private String steamId;
+
+
+
 
 }
