@@ -3,13 +3,17 @@ package org.example.findmateapi.Entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class Cs2Profile {
 
     @Id
@@ -18,6 +22,8 @@ public class Cs2Profile {
 
     @OneToOne(mappedBy = "cs2Profile")
     private UserProfiles userProfiles;
+
+
 
     private Integer primeRank;
 

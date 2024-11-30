@@ -8,10 +8,7 @@ import org.example.findmateapi.Request.CreateTeamRequest;
 import org.example.findmateapi.Service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/team")
@@ -28,7 +25,7 @@ public class TeamController {
             @ApiResponse(responseCode = "200", description = "Team created successfully"),
             @ApiResponse(responseCode = "400", description = "Team could not be created")
     })
-    @RequestMapping("/create")
+    @PostMapping("/create")
     private ResponseEntity<?> createTeam(@RequestBody CreateTeamRequest createTeamRequest, HttpServletRequest request){
         return teamService.createTeam(createTeamRequest, request);
     }

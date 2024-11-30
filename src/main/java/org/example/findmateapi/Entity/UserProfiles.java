@@ -2,11 +2,15 @@ package org.example.findmateapi.Entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class UserProfiles {
 
     @Id
@@ -35,4 +39,8 @@ public class UserProfiles {
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "sport_profile_id", referencedColumnName = "id")
     private SportProfile sportProfile;
+
+    public UserProfiles(User user) {
+        this.user = user;
+    }
 }

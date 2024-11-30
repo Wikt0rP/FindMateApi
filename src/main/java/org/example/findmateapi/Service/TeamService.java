@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import static org.example.findmateapi.Component.UserComponent.getUserFromToken;
+
 @Service
 public class TeamService {
 
@@ -50,11 +52,4 @@ public class TeamService {
 
     }
 
-    private User getUserFromToken(String token){
-        String username = jwtUtils.extractUsername(token);
-        if (username == null || username.isEmpty()) {
-            return null;
-        }
-        return userRepository.findByUsername(username).orElse(null);
-    }
 }
