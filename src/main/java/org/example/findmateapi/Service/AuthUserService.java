@@ -4,7 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.example.findmateapi.Entity.ERole;
 import org.example.findmateapi.Entity.Role;
 import org.example.findmateapi.Entity.User;
+import org.example.findmateapi.Entity.UserProfiles;
 import org.example.findmateapi.Repository.RoleRepository;
+import org.example.findmateapi.Repository.UserProfilesRepository;
 import org.example.findmateapi.Repository.UserRepository;
 import org.example.findmateapi.Request.LoginRequest;
 import org.example.findmateapi.Request.RegisterRequest;
@@ -29,6 +31,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.example.findmateapi.Component.UserComponent.getUserFromToken;
+
 @Service
 public class AuthUserService {
 
@@ -46,6 +50,8 @@ public class AuthUserService {
     private JwtUtils jwtUtils;
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private UserProfilesRepository userProfilesRepository;
 
     Logger logger = LoggerFactory.getLogger(AuthUserService.class);
 
@@ -68,10 +74,20 @@ public class AuthUserService {
         Role role = roleRepository.findByName(ERole.ROLE_USER)
                 .orElseGet(() -> roleRepository.save(new Role(ERole.ROLE_USER)));
 
+
+        //Create User
         User user = new User(registerRequest.getUsername(), registerRequest.getEmail(),
                 passwordEncoder.passwordEncoder().encode(registerRequest.getPassword()), role);
         user.setConfirmationCode(generateConfirmationCode());
         userRepository.save(user);
+
+        //Create UserProfiles and add to User
+        UserProfiles userProfiles = new UserProfiles(user);
+        user.setUserProfiles(userProfiles);
+        userProfilesRepository.save(userProfiles);
+        userRepository.save(user);
+
+
         sendConfirmationCodeMail(user.getEmail(), user);
         return ResponseEntity.ok("User registered successfully");
     }
@@ -174,13 +190,6 @@ public class AuthUserService {
 //        return ResponseEntity.badRequest().body("Invalid confirmation code");
 //    }
 
-    private User getUserFromToken(String token){
-        String username = jwtUtils.extractUsername(token);
-        if (username == null || username.isEmpty()) {
-            return null;
-        }
-        return userRepository.findByUsername(username).orElse(null);
-    }
 
     /**
      *  Validates email, password, username and checks if username already exists

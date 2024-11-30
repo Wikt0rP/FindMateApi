@@ -10,5 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateCs2ProfileRequest {
-    private Integer rank;
+
+    private Integer primeRank;
+
 }
