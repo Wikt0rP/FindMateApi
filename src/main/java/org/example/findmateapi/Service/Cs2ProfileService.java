@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 import static org.example.findmateapi.Component.UserComponent.getUserFromToken;
 
 @Service
@@ -64,6 +66,27 @@ public class Cs2ProfileService {
         }
 
 
+    }
+
+
+    public ResponseEntity<?> refreshCs2Profile(HttpServletRequest request){
+        String token = JwtUtils.getJwtFromRequest(request);
+        if(token == null || !jwtUtils.validateToken(token)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        User user = getUserFromToken(token);
+        if(user == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find user");
+        }
+
+        Cs2Profile cs2Profile = cs2ProfileRepository.findByUserProfiles(user.getUserProfiles()).orElse(null);
+        if(cs2Profile == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find Cs2 Profile");
+        }else{
+            cs2Profile.setLastRefreshed(LocalDateTime.now());
+            cs2ProfileRepository.save(cs2Profile);
+            return ResponseEntity.ok("Cs2 Profile refreshed successfully");
+        }
     }
 
     private void createUserProfiles(User user){

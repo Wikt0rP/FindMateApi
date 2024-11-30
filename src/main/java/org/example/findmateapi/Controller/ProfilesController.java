@@ -31,4 +31,16 @@ public class ProfilesController {
         return cs2ProfileService.createCs2Profile(createCs2ProfileRequest, request);
     }
 
+    @PostMapping("/refreshDateCs2")
+    @Operation(summary = "Refresh Cs2 Profile", description = "Refresh Cs2 Profile, requires token\n" +
+            "This date is used to sort users when searching for teammastes (newest first)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Cs2 Profile date refreshed successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Can not find Cs2Profile or UserProfiles")
+    })
+    public ResponseEntity<?> refreshDateCs2(HttpServletRequest request){
+        return cs2ProfileService.refreshCs2Profile(request);
+    }
+
 }
