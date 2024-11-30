@@ -1,6 +1,7 @@
 package org.example.findmateapi.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.example.findmateapi.Component.UserComponent;
 import org.example.findmateapi.Entity.Team;
 import org.example.findmateapi.Entity.User;
 import org.example.findmateapi.Repository.TeamRepository;
@@ -12,8 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import static org.example.findmateapi.Component.UserComponent.getUserFromToken;
-
 @Service
 public class TeamService {
 
@@ -23,6 +22,8 @@ public class TeamService {
     private TeamRepository teamRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private UserComponent userComponent;
 
     public ResponseEntity<?> createTeam(CreateTeamRequest createTeamRequest, HttpServletRequest request) {
 
@@ -32,7 +33,7 @@ public class TeamService {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
             }
 
-            User user = getUserFromToken(token);
+            User user = userComponent.getUserFromToken(token);
             if(user == null){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
             }

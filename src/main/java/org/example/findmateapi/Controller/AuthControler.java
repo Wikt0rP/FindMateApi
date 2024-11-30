@@ -40,7 +40,6 @@ public class AuthControler {
         return authUserService.loginUser(loginRequest);
     }
 
-    //TODO: TEST
     @Operation(summary = "Activate user", description = "Activate user with given code")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User activated successfully"),
@@ -61,6 +60,7 @@ public class AuthControler {
     public ResponseEntity<?> forgotPassword(@RequestBody String email){
         return authUserService.forgotPassword(email);
     }
+
     //TODO: TEST
     @Operation(summary="Change password", description="Change password with given reset code")
     @ApiResponses({

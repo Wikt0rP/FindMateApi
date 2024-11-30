@@ -10,11 +10,14 @@ import org.springframework.stereotype.Component;
 public class UserComponent {
 
     @Autowired
-    private static UserRepository userRepository;
-    @Autowired
-    private static JwtUtils jwtUtils;
+    private JwtUtils jwtUtils;
 
-    public static User getUserFromToken(String token){
+    @Autowired
+    private UserRepository userRepository;
+
+
+
+    public User getUserFromToken(String token){
         String username = jwtUtils.extractUsername(token);
         if (username == null || username.isEmpty()) {
             return null;
