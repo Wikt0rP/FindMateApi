@@ -23,6 +23,7 @@ public class ProfilesController {
     @Autowired
     private Cs2ProfileService cs2ProfileService;
 
+    //TODO: TEST
     @PostMapping("/cs2Create")
     @Operation(summary = "Create Cs2 Profile", description = "Create Cs2 Profile with given data, requires token")
     @ApiResponses({
@@ -35,6 +36,7 @@ public class ProfilesController {
         return cs2ProfileService.createCs2Profile(createCs2ProfileRequest, request);
     }
 
+    //TODO: TEST
     @PostMapping("/refreshDateCs2")
     @Operation(summary = "Refresh Cs2 Profile", description = "Refresh Cs2 Profile, requires token." +
             "This date is used to sort users when searching for teammastes (newest first)")
@@ -47,8 +49,9 @@ public class ProfilesController {
         return cs2ProfileService.refreshCs2Profile(request);
     }
 
+    //TODO: TEST
     @GetMapping("/searchCs2")
-    @Operation(summary = "Search Cs2 Profiles", description = "Search Cs2 Profiles with given data")
+    @Operation(summary = "Search Cs2 Profiles", description = "Search Cs2 Profiles with filters, requires token")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cs2 Profiles found successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
