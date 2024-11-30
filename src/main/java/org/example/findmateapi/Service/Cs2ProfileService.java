@@ -5,9 +5,11 @@ import org.example.findmateapi.Entity.Cs2Profile;
 import org.example.findmateapi.Entity.User;
 import org.example.findmateapi.Entity.UserProfiles;
 import org.example.findmateapi.Repository.Cs2ProfileRepository;
+import org.example.findmateapi.Repository.Cs2ProfileRepositoryCustom;
 import org.example.findmateapi.Repository.UserProfilesRepository;
 import org.example.findmateapi.Repository.UserRepository;
 import org.example.findmateapi.Request.CreateCs2ProfileRequest;
+import org.example.findmateapi.Request.FilterCs2ProfilesRequest;
 import org.example.findmateapi.Security.Jwt.JwtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.example.findmateapi.Component.UserComponent.getUserFromToken;
 
@@ -31,6 +34,7 @@ public class Cs2ProfileService {
     private UserProfilesRepository userProfilesRepository;
     @Autowired
     private Cs2ProfileRepository cs2ProfileRepository;
+
 
     Logger logger = LoggerFactory.getLogger(Cs2ProfileService.class);
 
@@ -68,7 +72,6 @@ public class Cs2ProfileService {
 
     }
 
-
     public ResponseEntity<?> refreshCs2Profile(HttpServletRequest request){
         String token = JwtUtils.getJwtFromRequest(request);
         if(token == null || !jwtUtils.validateToken(token)){
@@ -87,6 +90,22 @@ public class Cs2ProfileService {
             cs2ProfileRepository.save(cs2Profile);
             return ResponseEntity.ok("Cs2 Profile refreshed successfully");
         }
+    }
+
+    public ResponseEntity<?> searchCs2Profiles(FilterCs2ProfilesRequest filterCs2ProfilesRequest, HttpServletRequest request){
+        String token = JwtUtils.getJwtFromRequest(request);
+        if(token == null || !jwtUtils.validateToken(token)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        }
+        User user = getUserFromToken(token);
+        if(user == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find user");
+        }
+        List<Cs2Profile> cs2Profiles = cs2ProfileRepository.filterCs2Profiles(filterCs2ProfilesRequest);
+        if(cs2Profiles != null){
+            return ResponseEntity.status(HttpStatus.OK).body(cs2Profiles);
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error filtering Cs2 Profiles");
     }
 
     private void createUserProfiles(User user){
