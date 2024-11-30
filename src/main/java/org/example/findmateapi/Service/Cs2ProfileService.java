@@ -1,11 +1,11 @@
 package org.example.findmateapi.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.example.findmateapi.Component.UserComponent;
 import org.example.findmateapi.Entity.Cs2Profile;
 import org.example.findmateapi.Entity.User;
 import org.example.findmateapi.Entity.UserProfiles;
 import org.example.findmateapi.Repository.Cs2ProfileRepository;
-import org.example.findmateapi.Repository.Cs2ProfileRepositoryCustom;
 import org.example.findmateapi.Repository.UserProfilesRepository;
 import org.example.findmateapi.Repository.UserRepository;
 import org.example.findmateapi.Request.CreateCs2ProfileRequest;
@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.example.findmateapi.Component.UserComponent.getUserFromToken;
 
 @Service
 public class Cs2ProfileService {
@@ -34,6 +33,8 @@ public class Cs2ProfileService {
     private UserProfilesRepository userProfilesRepository;
     @Autowired
     private Cs2ProfileRepository cs2ProfileRepository;
+    @Autowired
+    private UserComponent userComponent;
 
 
     Logger logger = LoggerFactory.getLogger(Cs2ProfileService.class);
@@ -44,12 +45,12 @@ public class Cs2ProfileService {
         if(token == null || !jwtUtils.validateToken(token)){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
-        User user = getUserFromToken(token);
+        User user = userComponent.getUserFromToken(token);
         if(user == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find user");
         }
 
-
+        logger.info("Creating Cs2 Profile for user: {}", user.getUsername());
         UserProfiles userProfiles = userProfilesRepository.findByUser(user).orElse(null);
         if(userProfiles == null){
             createUserProfiles(user);
@@ -61,8 +62,9 @@ public class Cs2ProfileService {
                 logger.error("Error:    YOU FUCKED UP       {}", "UserProfiles is null");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Can not find UserProfiles");
             }
+            logger.info("Cs2 Profile created successfully");
             userProfiles.setCs2Profile(cs2Profile);
-
+            userProfilesRepository.save(userProfiles);
             return ResponseEntity.status(HttpStatus.CREATED).body("Cs2 Profile created successfully");
         }catch (Exception e){
             logger.error("Error:    CAN NOT CREATE CS2 PROFILE       {}", e.getMessage());
@@ -77,7 +79,7 @@ public class Cs2ProfileService {
         if(token == null || !jwtUtils.validateToken(token)){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
-        User user = getUserFromToken(token);
+        User user = userComponent.getUserFromToken(token);
         if(user == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find user");
         }
@@ -97,7 +99,7 @@ public class Cs2ProfileService {
         if(token == null || !jwtUtils.validateToken(token)){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
-        User user = getUserFromToken(token);
+        User user = userComponent.getUserFromToken(token);
         if(user == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find user");
         }

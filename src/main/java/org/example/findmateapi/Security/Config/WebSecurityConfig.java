@@ -47,6 +47,7 @@ public class WebSecurityConfig {
                                 "/swagger-ui.html",
                                 "/swagger-ui/index.html",
                                 "/error").permitAll()
+                        .requestMatchers("/profile/searchCs2").authenticated()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e.authenticationEntryPoint(authenticationJwtTokenFilter()))
                 .oauth2Login(oauth2 -> oauth2

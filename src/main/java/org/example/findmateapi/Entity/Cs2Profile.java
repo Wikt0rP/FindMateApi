@@ -1,6 +1,7 @@
 package org.example.findmateapi.Entity;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class Cs2Profile {
     private Long id;
 
     @OneToOne(mappedBy = "cs2Profile")
+    @JsonBackReference
     private UserProfiles userProfiles;
 
 

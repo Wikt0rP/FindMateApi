@@ -1,6 +1,7 @@
 package org.example.findmateapi.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.example.findmateapi.Component.UserComponent;
 import org.example.findmateapi.Entity.ERole;
 import org.example.findmateapi.Entity.Role;
 import org.example.findmateapi.Entity.User;
@@ -31,7 +32,6 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.example.findmateapi.Component.UserComponent.getUserFromToken;
 
 @Service
 public class AuthUserService {
@@ -52,6 +52,8 @@ public class AuthUserService {
     private RoleRepository roleRepository;
     @Autowired
     private UserProfilesRepository userProfilesRepository;
+    @Autowired
+    private UserComponent userComponent;
 
     Logger logger = LoggerFactory.getLogger(AuthUserService.class);
 
@@ -126,7 +128,7 @@ public class AuthUserService {
             return ResponseEntity.badRequest().body("Unauthorized");
         }
 
-        User user = getUserFromToken(token);
+        User user = userComponent.getUserFromToken(token);
         if(user == null){
             return ResponseEntity.badRequest().body("User not found");
         }

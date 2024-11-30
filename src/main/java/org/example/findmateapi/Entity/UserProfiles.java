@@ -1,5 +1,6 @@
 package org.example.findmateapi.Entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,6 +35,7 @@ public class UserProfiles {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "cs2_profile_id", referencedColumnName = "id")
+    @JsonManagedReference
     private Cs2Profile cs2Profile;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
