@@ -5,11 +5,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import org.example.findmateapi.Request.CreateCs2ProfileRequest;
+import org.example.findmateapi.Request.FilterCs2ProfilesRequest;
 import org.example.findmateapi.Service.Cs2ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/profile")
@@ -32,7 +36,7 @@ public class ProfilesController {
     }
 
     @PostMapping("/refreshDateCs2")
-    @Operation(summary = "Refresh Cs2 Profile", description = "Refresh Cs2 Profile, requires token\n" +
+    @Operation(summary = "Refresh Cs2 Profile", description = "Refresh Cs2 Profile, requires token." +
             "This date is used to sort users when searching for teammastes (newest first)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cs2 Profile date refreshed successfully"),
@@ -41,6 +45,21 @@ public class ProfilesController {
     })
     public ResponseEntity<?> refreshDateCs2(HttpServletRequest request){
         return cs2ProfileService.refreshCs2Profile(request);
+    }
+
+    @GetMapping("/searchCs2")
+    @Operation(summary = "Search Cs2 Profiles", description = "Search Cs2 Profiles with given data")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Cs2 Profiles found successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Can not find UserProfiles"),
+            @ApiResponse(responseCode = "500", description = "Can not filter Cs2Profiles")
+    })
+    public ResponseEntity<?> searchCs2Profiles(@RequestParam(required = false) Integer minPrimeRank, @RequestParam(required = false) Integer maxPrimeRank, @RequestParam(required = false) LocalDateTime lastRefreshed,
+                                               HttpServletRequest request){
+
+        FilterCs2ProfilesRequest filterCs2ProfilesRequest = new FilterCs2ProfilesRequest(minPrimeRank, maxPrimeRank, lastRefreshed);
+        return cs2ProfileService.searchCs2Profiles(filterCs2ProfilesRequest, request);
     }
 
 }
