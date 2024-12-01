@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.Getter;
 import org.example.findmateapi.Request.CreateCs2ProfileRequest;
 import org.example.findmateapi.Request.FilterCs2ProfilesRequest;
 import org.example.findmateapi.Service.Cs2ProfileService;
@@ -47,7 +46,6 @@ public class ProfilesController {
         return cs2ProfileService.refreshCs2Profile(request);
     }
 
-    //TODO: Add returning more than only cs2 profile + add User + other profiles
     @GetMapping("/searchCs2")
     @Operation(summary = "Search Cs2 Profiles", description = "Search Cs2 Profiles with filters<br>" +
             "Requires token<br>" +
