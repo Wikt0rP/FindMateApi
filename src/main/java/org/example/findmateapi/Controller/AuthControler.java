@@ -50,24 +50,22 @@ public class AuthControler {
         return authUserService.confirmOperationAfterLogin(code, request);
     }
 
-    //TODO: TEST
     @Operation(summary="Forgot password", description="Send email to user with reset code")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Email sent successfully"),
             @ApiResponse(responseCode = "400", description = "Email could not be sent")
     })
-    @PostMapping("/forgot-password")
+    @PostMapping("/forgot-cha")
     public ResponseEntity<?> forgotPassword(@RequestBody String email){
         return authUserService.forgotPassword(email);
     }
 
-    //TODO: TEST
     @Operation(summary="Change password", description="Change password with given reset code")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Password changed successfully"),
             @ApiResponse(responseCode = "400", description = "Password could not be changed")
     })
-    @PostMapping("/change-password")
+    @PatchMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ResetPasswordRequest resetPasswordRequest){
         return authUserService.changePassword(resetPasswordRequest);
     }
