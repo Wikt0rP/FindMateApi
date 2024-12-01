@@ -15,4 +15,5 @@ public class FilterCs2ProfilesRequest {
     private Integer minPrimeRank;
     private Integer maxPrimeRank;
     private LocalDateTime lastRefreshed;
+    private Boolean fullInfo;
 }
