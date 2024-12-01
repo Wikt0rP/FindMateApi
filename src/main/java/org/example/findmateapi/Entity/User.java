@@ -45,6 +45,7 @@ public class User {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "user_profiles_id", referencedColumnName = "id")
+    @JsonManagedReference
     private UserProfiles userProfiles;
 
     @ManyToMany

@@ -10,6 +10,8 @@ import org.example.findmateapi.Repository.UserProfilesRepository;
 import org.example.findmateapi.Repository.UserRepository;
 import org.example.findmateapi.Request.CreateCs2ProfileRequest;
 import org.example.findmateapi.Request.FilterCs2ProfilesRequest;
+import org.example.findmateapi.Response.ProfilesFullResponse;
+import org.example.findmateapi.Response.ProfilesResponse;
 import org.example.findmateapi.Security.Jwt.JwtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +21,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -94,6 +98,7 @@ public class Cs2ProfileService {
         }
     }
 
+    //TODO: FINISH THIS
     public ResponseEntity<?> searchCs2Profiles(FilterCs2ProfilesRequest filterCs2ProfilesRequest, HttpServletRequest request){
         String token = JwtUtils.getJwtFromRequest(request);
         if(token == null || !jwtUtils.validateToken(token)){
@@ -103,11 +108,28 @@ public class Cs2ProfileService {
         if(user == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find user");
         }
+
         List<Cs2Profile> cs2Profiles = cs2ProfileRepository.filterCs2Profiles(filterCs2ProfilesRequest);
-        if(cs2Profiles != null){
-            return ResponseEntity.status(HttpStatus.OK).body(cs2Profiles);
+        if(cs2Profiles == null){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error filtering Cs2 Profiles");
         }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error filtering Cs2 Profiles");
+
+        try{
+            if(filterCs2ProfilesRequest.getFullInfo()){
+                List<ProfilesFullResponse> response = createFullResponse(cs2Profiles);
+                if(response == null){
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating response");
+                }
+                return ResponseEntity.status(HttpStatus.OK).body(response);
+            }
+            List<ProfilesResponse> response = createResponse(cs2Profiles);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }catch (Exception e){
+            logger.error("Error:    CAN NOT CREATE RESPONSE       {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating response");
+        }
+
+
     }
 
     private void createUserProfiles(User user){
@@ -115,6 +137,52 @@ public class Cs2ProfileService {
         userProfiles.setUser(user);
         user.setUserProfiles(userProfiles);
         userRepository.save(user);
+    }
+
+    private List<ProfilesResponse> createResponse(List<Cs2Profile> profilescs2){
+        List<ProfilesResponse> response = new ArrayList<>();
+
+        for(int i = 0; i < profilescs2.size(); i++){
+            Cs2Profile tempcs2 = profilescs2.get(i);
+
+            UserProfiles userProfiles = userProfilesRepository.findByCs2Profile(tempcs2).orElse(null);
+            if(userProfiles == null){
+                return null;
+            }
+
+            User user = userRepository.findUserByUserProfiles(userProfiles).orElse(null);
+            if(user == null){
+                return null;
+            }
+
+            response.add(new ProfilesResponse(user.getId(), user.getUsername(), user.getEmail(), tempcs2));
+
+        }
+
+        return response;
+    }
+
+    private List<ProfilesFullResponse> createFullResponse(List<Cs2Profile> profilescs2){
+        List<ProfilesFullResponse> response = new ArrayList<>();
+
+        for(int i = 0; i < profilescs2.size(); i++){
+            Cs2Profile tempcs2 = profilescs2.get(i);
+
+            UserProfiles userProfiles = userProfilesRepository.findByCs2Profile(tempcs2).orElse(null);
+            if(userProfiles == null){
+                return null;
+            }
+
+            User user = userRepository.findUserByUserProfiles(userProfiles).orElse(null);
+            if(user == null){
+                return null;
+            }
+
+            response.add(new ProfilesFullResponse(user.getId(), user.getUsername(), user.getEmail(), userProfiles));
+
+        }
+
+        return response;
     }
 
 

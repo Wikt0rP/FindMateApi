@@ -49,7 +49,10 @@ public class ProfilesController {
 
     //TODO: Add returning more than only cs2 profile + add User + other profiles
     @GetMapping("/searchCs2")
-    @Operation(summary = "Search Cs2 Profiles", description = "Search Cs2 Profiles with filters, requires token")
+    @Operation(summary = "Search Cs2 Profiles", description = "Search Cs2 Profiles with filters<br>" +
+            "Requires token<br>" +
+            "If want to see all profiles (fullInfo = true) <br><br>" +
+            "EXAMPLE: <br>127.0.0.1:8080/profile/searchCs2?minPrimeRank=INTEGER&maxPrimeRank=INTEGER&lastRefreshed=2024-11-10T22:00:00&fullInfo=True")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cs2 Profiles found successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -57,9 +60,9 @@ public class ProfilesController {
             @ApiResponse(responseCode = "500", description = "Can not filter Cs2Profiles")
     })
     public ResponseEntity<?> searchCs2Profiles(@RequestParam(required = false) Integer minPrimeRank, @RequestParam(required = false) Integer maxPrimeRank, @RequestParam(required = false) LocalDateTime lastRefreshed,
-                                               HttpServletRequest request){
+                                               @RequestParam(required = false) Boolean fullInfo, HttpServletRequest request){
 
-        FilterCs2ProfilesRequest filterCs2ProfilesRequest = new FilterCs2ProfilesRequest(minPrimeRank, maxPrimeRank, lastRefreshed);
+        FilterCs2ProfilesRequest filterCs2ProfilesRequest = new FilterCs2ProfilesRequest(minPrimeRank, maxPrimeRank, lastRefreshed, fullInfo);
         return cs2ProfileService.searchCs2Profiles(filterCs2ProfilesRequest, request);
     }
 
