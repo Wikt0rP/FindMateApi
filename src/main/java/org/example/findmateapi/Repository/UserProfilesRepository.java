@@ -1,16 +1,15 @@
 package org.example.findmateapi.Repository;
 
 import org.example.findmateapi.Entity.Cs2Profile;
+import org.example.findmateapi.Entity.User;
 import org.example.findmateapi.Entity.UserProfiles;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface Cs2ProfileRepository extends JpaRepository<Cs2Profile, Long>, Cs2ProfileRepositoryCustom {
-    Optional<Cs2Profile> findByUserProfiles(UserProfiles userProfiles);
-
+public interface UserProfilesRepository extends JpaRepository<UserProfiles, Long> {
+    Optional<UserProfiles> findByUser(User user);
+    Optional<UserProfiles> findByCs2Profile(Cs2Profile cs2Profile);
 }

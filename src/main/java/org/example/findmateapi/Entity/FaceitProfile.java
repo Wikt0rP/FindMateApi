@@ -12,5 +12,11 @@ public class FaceitProfile {
 
     @OneToOne(mappedBy = "faceitProfile")
     @JsonBackReference
-    private User User;
+    private UserProfiles userProfiles;
+
+
+    // FACEIT LEVEL
+    // MATCHES
+    // WIN RATE
+
 }

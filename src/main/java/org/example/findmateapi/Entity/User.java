@@ -8,6 +8,7 @@ import lombok.Setter;
 
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -35,7 +36,7 @@ public class User {
 
     private String confirmationCode;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -43,29 +44,19 @@ public class User {
     private Set<Role> roles = new HashSet<>();
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "faceit_profile_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_profiles_id", referencedColumnName = "id")
     @JsonManagedReference
-    private FaceitProfile faceitProfile;
+    private UserProfiles userProfiles;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "riot_profile_id", referencedColumnName = "id")
+    @ManyToMany
+    @JoinTable(
+            name = "user_teams", // Nazwa tabeli łączącej
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "team_id")
+    )
     @JsonManagedReference
-    private RiotProfile riotProfile;
+    private List<Team> teams;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "steam_profile_id", referencedColumnName = "id")
-    @JsonManagedReference
-    private SteamProfile steamProfile;
-
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "cs2_profile_id", referencedColumnName = "id")
-    @JsonManagedReference
-    private Cs2Profile cs2Profile;
-
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "sport_profile_id", referencedColumnName = "id")
-    @JsonManagedReference
-    private SportProfile sportProfile;
 
     public User(String username, String email, String password, Role role) {
         this.username = username;

@@ -1,13 +1,17 @@
 package org.example.findmateapi.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.example.findmateapi.Component.UserComponent;
 import org.example.findmateapi.Entity.ERole;
 import org.example.findmateapi.Entity.Role;
 import org.example.findmateapi.Entity.User;
+import org.example.findmateapi.Entity.UserProfiles;
 import org.example.findmateapi.Repository.RoleRepository;
+import org.example.findmateapi.Repository.UserProfilesRepository;
 import org.example.findmateapi.Repository.UserRepository;
 import org.example.findmateapi.Request.LoginRequest;
 import org.example.findmateapi.Request.RegisterRequest;
+import org.example.findmateapi.Request.ResetPasswordRequest;
 import org.example.findmateapi.Response.JwtResponse;
 import org.example.findmateapi.Security.Config.PasswordEncoderConfig;
 import org.example.findmateapi.Security.Impl.UserDetailsImpl;
@@ -22,12 +26,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 @Service
 public class AuthUserService {
@@ -46,6 +50,10 @@ public class AuthUserService {
     private JwtUtils jwtUtils;
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private UserProfilesRepository userProfilesRepository;
+    @Autowired
+    private UserComponent userComponent;
 
     Logger logger = LoggerFactory.getLogger(AuthUserService.class);
 
@@ -68,10 +76,20 @@ public class AuthUserService {
         Role role = roleRepository.findByName(ERole.ROLE_USER)
                 .orElseGet(() -> roleRepository.save(new Role(ERole.ROLE_USER)));
 
+
+        //Create User
         User user = new User(registerRequest.getUsername(), registerRequest.getEmail(),
                 passwordEncoder.passwordEncoder().encode(registerRequest.getPassword()), role);
         user.setConfirmationCode(generateConfirmationCode());
         userRepository.save(user);
+
+        //Create UserProfiles and add to User
+        UserProfiles userProfiles = new UserProfiles(user);
+        user.setUserProfiles(userProfiles);
+        userProfilesRepository.save(userProfiles);
+        userRepository.save(user);
+
+
         sendConfirmationCodeMail(user.getEmail(), user);
         return ResponseEntity.ok("User registered successfully");
     }
@@ -110,7 +128,7 @@ public class AuthUserService {
             return ResponseEntity.badRequest().body("Unauthorized");
         }
 
-        User user = getUserFromToken(token);
+        User user = userComponent.getUserFromToken(token);
         if(user == null){
             return ResponseEntity.badRequest().body("User not found");
         }
@@ -122,6 +140,42 @@ public class AuthUserService {
         }else{
             return ResponseEntity.badRequest().body("Invalid confirmation code");
         }
+    }
+
+    public ResponseEntity<?> forgotPassword(String email){
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if(userOptional.isEmpty()){
+            return ResponseEntity.badRequest().body("User not found");
+        }
+        User user = userOptional.get();
+        user.setConfirmationCode(generateConfirmationCode());
+        userRepository.save(user);
+        sendConfirmationCodeMail(user.getEmail(), user);
+        return ResponseEntity.ok("Confirmation code sent to email");
+    }
+
+    /**
+     * Changes password if user is found by email and confirmation code is correct. Password must be valid at password strength 3
+     * @param resetPasswordRequest ResetPasswordRequest object
+     * @return ResponseEntity with message
+     */
+    public ResponseEntity<?> changePassword(ResetPasswordRequest resetPasswordRequest){
+        Optional<User> userOptional = userRepository.findByEmail(resetPasswordRequest.getEmail());
+        if(userOptional.isEmpty()){
+            return ResponseEntity.badRequest().body("Invalid confirmation code");
+        }
+        User user = userOptional.get();
+
+        if(!passwordValidation.isValidPassword(resetPasswordRequest.getNewPassword(), user.getUsername(), 3)){
+            return ResponseEntity.badRequest().body("Invalid password");
+        }
+        else{
+            user.setPassword(passwordEncoder.passwordEncoder().encode(resetPasswordRequest.getNewPassword()));
+            user.setConfirmationCode(null);
+            userRepository.save(user);
+            return ResponseEntity.ok("Password changed successfully");
+        }
+
     }
 
 //    public ResponseEntity<?> confirmOperationByEmail(String email, String confirmationCode){
@@ -138,11 +192,6 @@ public class AuthUserService {
 //        return ResponseEntity.badRequest().body("Invalid confirmation code");
 //    }
 
-    private User getUserFromToken(String token){
-        String username = jwtUtils.extractUsername(token);
-        return userRepository.findByUsername(username)
-                .orElse(null);
-    }
 
     /**
      *  Validates email, password, username and checks if username already exists
