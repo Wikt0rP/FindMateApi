@@ -1,7 +1,5 @@
 package org.example.findmateapi.Security.Impl;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +9,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,11 +24,8 @@ public class UserDetailsImpl implements UserDetails {
     private String googleId;
     private boolean isActive;
     private Set<Role> roles;
-    private FaceitProfile faceitProfile;
-    private RiotProfile riotProfile;
-    private SteamProfile steamProfile;
-    private Cs2Profile cs2Profile;
-    private SportProfile sportProfile;
+    private UserProfiles userProfiles;
+    private List<Team> teams;
 
 
 

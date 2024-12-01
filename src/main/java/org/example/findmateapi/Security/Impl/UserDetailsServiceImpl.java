@@ -4,7 +4,6 @@ import jakarta.transaction.Transactional;
 import org.example.findmateapi.Entity.User;
 import org.example.findmateapi.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -32,11 +31,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 user.getGoogleId(),
                 user.isActive(),
                 user.getRoles(),
-                user.getFaceitProfile(),
-                user.getRiotProfile(),
-                user.getSteamProfile(),
-                user.getCs2Profile(),
-                user.getSportProfile()
+                user.getUserProfiles(),
+                user.getTeams()
         );
     }
 }

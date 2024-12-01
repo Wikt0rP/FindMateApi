@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateCs2ProfileRequest {
-
-    private Integer primeRank;
-
+public class ResetPasswordRequest {
+    private String email;
+    private String code;
+    private String newPassword;
 }
