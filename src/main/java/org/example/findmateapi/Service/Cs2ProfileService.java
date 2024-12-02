@@ -55,18 +55,21 @@ public class Cs2ProfileService {
         }
 
         logger.info("Creating Cs2 Profile for user: {}", user.getUsername());
-        UserProfiles userProfiles = userProfilesRepository.findByUser(user).orElse(null);
-        if(userProfiles == null){
-            createUserProfiles(user);
-        }
-
         try{
+            UserProfiles userProfiles = userProfilesRepository.findByUser(user).orElse(null);
+            if (userProfiles == null) {
+                createUserProfiles(user);
+                userProfiles = user.getUserProfiles();
+            }
+
+
             Cs2Profile cs2Profile = new Cs2Profile(userProfiles, createCs2ProfileRequest.getPrimeRank());
             if(userProfiles == null){
                 logger.error("Error:    YOU FUCKED UP       {}", "UserProfiles is null");
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Can not find UserProfiles");
             }
             logger.info("Cs2 Profile created successfully");
+            cs2ProfileRepository.save(cs2Profile); // Save Cs2Profile
             userProfiles.setCs2Profile(cs2Profile);
             userProfilesRepository.save(userProfiles);
             return ResponseEntity.status(HttpStatus.CREATED).body("Cs2 Profile created successfully");
