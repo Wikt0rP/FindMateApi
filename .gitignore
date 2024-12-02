@@ -40,3 +40,5 @@ src/main/resources/application.properties
 src/main/resources/credentials.json
 /tokens/StoredCredential
 /tokens/*
+
+*.env
