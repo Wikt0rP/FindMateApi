@@ -41,7 +41,9 @@ public class WebSecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/*").permitAll()
+                        .requestMatchers("/auth/*",
+                                //TODO: remove city/all
+                                "/city/test").permitAll()
                         .requestMatchers("/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
@@ -70,4 +72,5 @@ public class WebSecurityConfig {
         provider.setPasswordEncoder(passwordEncoderConfig.passwordEncoder());
         return provider;
     }
+
 }

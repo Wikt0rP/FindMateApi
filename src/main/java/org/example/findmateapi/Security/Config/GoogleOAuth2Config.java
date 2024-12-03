@@ -19,11 +19,11 @@ public class GoogleOAuth2Config {
     @Bean
     public ClientRegistrationRepository clientRegistrationRepository() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        InputStream inputStream = new ClassPathResource("credentials.json").getInputStream();
+        InputStream inputStream = new ClassPathResource("/secretGoogle.json").getInputStream();
         JsonNode credentials = mapper.readTree(inputStream);
 
-        String clientId = credentials.get("installed").get("client_id").asText();
-        String clientSecret = credentials.get("installed").get("client_secret").asText();
+        String clientId = credentials.get("web").get("client_id").asText();
+        String clientSecret = credentials.get("web").get("client_secret").asText();
 
         return new InMemoryClientRegistrationRepository(getGoogleClientRegistration(clientId, clientSecret));
     }

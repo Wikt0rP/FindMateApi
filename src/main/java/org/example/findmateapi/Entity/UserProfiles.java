@@ -47,4 +47,5 @@ public class UserProfiles {
     public UserProfiles(User user) {
         this.user = user;
     }
+
 }
