@@ -35,8 +35,9 @@ build/
 
 
 
-src/main/resources
-src/main/resources/application.properties
-src/main/resources/credentials.json
+src/main/resources/data.json
+src/main/resources/secretGoogle.json
 /tokens/StoredCredential
 /tokens/*
+
+*.env
