@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.findmateapi.Request.CreateCs2ProfileRequest;
 import org.example.findmateapi.Request.FilterCs2ProfilesRequest;
+import org.example.findmateapi.Request.UpdateCs2ProfileRequest;
 import org.example.findmateapi.Service.Cs2ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class ProfilesController {
     @Autowired
     private Cs2ProfileService cs2ProfileService;
 
-    @PostMapping("/cs2Create")
+    @PostMapping("/createCs2")
     @Operation(summary = "Create Cs2 Profile", description = "Create Cs2 Profile with given data, requires token")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Cs2 Profile created successfully"),
@@ -62,6 +63,19 @@ public class ProfilesController {
 
         FilterCs2ProfilesRequest filterCs2ProfilesRequest = new FilterCs2ProfilesRequest(minPrimeRank, maxPrimeRank, lastRefreshed, fullInfo);
         return cs2ProfileService.searchCs2Profiles(filterCs2ProfilesRequest, request);
+    }
+
+    @PutMapping("/updateCs2")
+    @Operation(summary = "Update Cs2 Profile", description = "Update Cs2 Profile with given data<br>" +
+            " requires token")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Cs2 Profile updated successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Can not find Cs2Profile"),
+            @ApiResponse(responseCode = "500", description = "Can not update Cs2Profile")
+    })
+    public ResponseEntity<?> updateCs2Profile(@RequestBody UpdateCs2ProfileRequest updateCs2ProfileRequest, HttpServletRequest request){
+        return cs2ProfileService.updateCs2Profile(updateCs2ProfileRequest, request);
     }
 
 }

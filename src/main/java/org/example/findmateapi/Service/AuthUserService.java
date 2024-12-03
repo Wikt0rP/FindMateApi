@@ -100,8 +100,11 @@ public class AuthUserService {
      */
     public ResponseEntity<?> loginUser(LoginRequest loginRequest){
         try{
+            logger.info("Attempting login for user: {}", loginRequest.getUsername());
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            logger.info("User {} successfully authenticated", loginRequest.getUsername());
             String jwt = jwtUtils.generateJwtToken(authentication);
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
             Set<Role> roles = userDetails.getAuthorities().stream()
@@ -112,6 +115,7 @@ public class AuthUserService {
                     }).collect(Collectors.toSet());
             return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
         }catch (Exception e){
+            logger.error("Login failed for user {}: {}", loginRequest.getUsername(), e.getMessage());
             return ResponseEntity.badRequest().body("Invalid credentials");
         }
     }

@@ -2,6 +2,7 @@ package org.example.findmateapi.Entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,10 +12,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Entity
 @Getter
 @Setter
+@AllArgsConstructor
 @NoArgsConstructor
+@Entity
 public class User {
 
     @Id
@@ -50,7 +52,7 @@ public class User {
 
     @ManyToMany
     @JoinTable(
-            name = "user_teams", // Nazwa tabeli łączącej
+            name = "user_teams",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "team_id")
     )
