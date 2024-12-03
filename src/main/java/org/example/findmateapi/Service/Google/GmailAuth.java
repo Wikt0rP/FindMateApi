@@ -49,7 +49,7 @@ public class GmailAuth {
      * If modifying these scopes, delete your previously saved tokens/ folder.
      */
     private static final List<String> SCOPES = Collections.singletonList(GmailScopes.GMAIL_SEND);
-    private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
+    private static final String CREDENTIALS_FILE_PATH = "/secretGoogle.json";
 
     private static Logger log = LoggerFactory.getLogger(GmailAuth.class);
 
