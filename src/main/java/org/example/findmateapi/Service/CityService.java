@@ -52,18 +52,21 @@ public class CityService {
         }
 
 
-        List<City> citiesInRadius = cities.stream()
-                .filter(c ->
-                        calculateDistance(
-                                city.getLatitude(), city.getLongitude(),
-                                c.getLatitude(), c.getLongitude()) <= getCitiesInRadiusRequest.getRadius())
-                .toList();
+        List<City> citiesInRadius = getListOfCitiesInRadius(city, getCitiesInRadiusRequest.getRadius());
 
         if(citiesInRadius.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No cities found in radius");
         }
         return ResponseEntity.ok(citiesInRadius);
 
+    }
+    public List<City> getListOfCitiesInRadius(City city, Integer radius) {
+        return cities.stream()
+                .filter(c ->
+                        calculateDistance(
+                                city.getLatitude(), city.getLongitude(),
+                                c.getLatitude(), c.getLongitude()) <= radius)
+                .toList();
     }
 
     @PostConstruct
