@@ -72,4 +72,5 @@ public class WebSecurityConfig {
         provider.setPasswordEncoder(passwordEncoderConfig.passwordEncoder());
         return provider;
     }
+
 }
