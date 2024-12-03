@@ -10,6 +10,7 @@ import org.example.findmateapi.Repository.UserProfilesRepository;
 import org.example.findmateapi.Repository.UserRepository;
 import org.example.findmateapi.Request.CreateCs2ProfileRequest;
 import org.example.findmateapi.Request.FilterCs2ProfilesRequest;
+import org.example.findmateapi.Request.UpdateCs2ProfileRequest;
 import org.example.findmateapi.Response.ProfilesFullResponse;
 import org.example.findmateapi.Response.ProfilesResponse;
 import org.example.findmateapi.Security.Jwt.JwtUtils;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,36 +47,31 @@ public class Cs2ProfileService {
 
     public ResponseEntity<?> createCs2Profile(CreateCs2ProfileRequest createCs2ProfileRequest, HttpServletRequest request) {
 
-        String token = JwtUtils.getJwtFromRequest(request);
-        if(token == null || !jwtUtils.validateToken(token)){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        HashMap<String, User> response = userComponent.getUserFromRequest(request);
+        if(!response.containsKey("OK")){
+            String error = response.keySet().stream().findFirst().orElse("Unknown error");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
-        User user = userComponent.getUserFromToken(token);
-        if(user == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find user");
-        }
+        User user = response.get("OK");
 
-        logger.info("Creating Cs2 Profile for user: {}", user.getUsername());
+
         try{
             UserProfiles userProfiles = userProfilesRepository.findByUser(user).orElse(null);
             if (userProfiles == null) {
                 createUserProfiles(user);
                 userProfiles = user.getUserProfiles();
             }
-
+            if(userProfiles.getCs2Profile() != null){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already has a Cs2 Profile");
+            }
 
             Cs2Profile cs2Profile = new Cs2Profile(userProfiles, createCs2ProfileRequest.getPrimeRank());
-            if(userProfiles == null){
-                logger.error("Error:    YOU FUCKED UP       {}", "UserProfiles is null");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Can not find UserProfiles");
-            }
-            logger.info("Cs2 Profile created successfully");
-            cs2ProfileRepository.save(cs2Profile); // Save Cs2Profile
+            cs2ProfileRepository.save(cs2Profile);
+
             userProfiles.setCs2Profile(cs2Profile);
             userProfilesRepository.save(userProfiles);
             return ResponseEntity.status(HttpStatus.CREATED).body("Cs2 Profile created successfully");
         }catch (Exception e){
-            logger.error("Error:    CAN NOT CREATE CS2 PROFILE       {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating Cs2 Profile");
         }
 
@@ -82,14 +79,12 @@ public class Cs2ProfileService {
     }
 
     public ResponseEntity<?> refreshCs2Profile(HttpServletRequest request){
-        String token = JwtUtils.getJwtFromRequest(request);
-        if(token == null || !jwtUtils.validateToken(token)){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        HashMap<String, User> response = userComponent.getUserFromRequest(request);
+        if(!response.containsKey("OK")){
+            String error = response.keySet().stream().findFirst().orElse("Unknown error");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
-        User user = userComponent.getUserFromToken(token);
-        if(user == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find user");
-        }
+        User user = response.get("OK");
 
         Cs2Profile cs2Profile = cs2ProfileRepository.findByUserProfiles(user.getUserProfiles()).orElse(null);
         if(cs2Profile == null){
@@ -101,16 +96,13 @@ public class Cs2ProfileService {
         }
     }
 
-    //TODO: FINISH THIS
     public ResponseEntity<?> searchCs2Profiles(FilterCs2ProfilesRequest filterCs2ProfilesRequest, HttpServletRequest request){
-        String token = JwtUtils.getJwtFromRequest(request);
-        if(token == null || !jwtUtils.validateToken(token)){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
+        HashMap<String, User> responseUser = userComponent.getUserFromRequest(request);
+        if(!responseUser.containsKey("OK")){
+            String error = responseUser.keySet().stream().findFirst().orElse("Unknown error");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
-        User user = userComponent.getUserFromToken(token);
-        if(user == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find user");
-        }
+        User user = responseUser.get("OK");
 
         List<Cs2Profile> cs2Profiles = cs2ProfileRepository.filterCs2Profiles(filterCs2ProfilesRequest);
         if(cs2Profiles == null){
@@ -132,6 +124,39 @@ public class Cs2ProfileService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating response");
         }
 
+
+    }
+
+    public ResponseEntity<?> updateCs2Profile(UpdateCs2ProfileRequest updateRequest, HttpServletRequest request){
+        HashMap<String, User> response = userComponent.getUserFromRequest(request);
+        if(!response.containsKey("OK")){
+            String error = response.keySet().stream().findFirst().orElse("Unknown error");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
+        User user = response.get("OK");
+
+        Cs2Profile cs2Profile = findCs2ProfileByUser(user);
+        if(cs2Profile == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find Cs2 Profile");
+        }
+
+        try {
+            cs2Profile.setPrimeRank(updateRequest.getPrimeRank());
+            cs2ProfileRepository.save(cs2Profile);
+            return ResponseEntity.status(HttpStatus.OK).body("Cs2 Profile updated successfully");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating Cs2 Profile");
+        }
+    }
+
+
+
+    protected Cs2Profile findCs2ProfileByUser(User user){
+        UserProfiles userProfiles = userProfilesRepository.findByUser(user).orElse(null);
+        if(userProfiles == null){
+            return null;
+        }
+        return cs2ProfileRepository.findByUserProfiles(userProfiles).orElse(null);
 
     }
 

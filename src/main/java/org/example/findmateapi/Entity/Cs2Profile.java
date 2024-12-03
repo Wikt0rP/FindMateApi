@@ -11,10 +11,10 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Cs2Profile {
 
     @Id

@@ -65,6 +65,8 @@ public class AuthControler {
             @ApiResponse(responseCode = "200", description = "Password changed successfully"),
             @ApiResponse(responseCode = "400", description = "Password could not be changed")
     })
+
+    //TODO: TEST
     @PatchMapping("/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ResetPasswordRequest resetPasswordRequest){
         return authUserService.changePassword(resetPasswordRequest);
