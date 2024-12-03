@@ -5,7 +5,6 @@ import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInsta
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -13,10 +12,6 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
-import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.mail.MessagingException;
@@ -51,34 +46,40 @@ public class GmailAuth {
     private static final List<String> SCOPES = Collections.singletonList(GmailScopes.GMAIL_SEND);
     private static final String CREDENTIALS_FILE_PATH = "/secretGoogle.json";
 
-    private static Logger log = LoggerFactory.getLogger(GmailAuth.class);
 
-
-
-    private static GoogleCredentials getGoogleCredentials() throws IOException {
-        // Wczytaj plik klucza serwisowego
+    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
+        // Load client secrets.
         InputStream in = GmailAuth.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
         if (in == null) {
             throw new FileNotFoundException("Resource not found: " + CREDENTIALS_FILE_PATH);
         }
+        GoogleClientSecrets clientSecrets =
+                GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(in));
 
+        // Build flow and trigger user authorization request.
+        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+                .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
+                .setAccessType("offline")
+                .build();
+        LocalServerReceiver receiver = new LocalServerReceiver.Builder()
+                .setPort(8888)
+                .setCallbackPath("/Callback")
+                .build();
 
-        return GoogleCredentials.fromStream(in)
-                .createScoped(Collections.singleton(GmailScopes.GMAIL_SEND));
+        Credential credential = new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        //returns an authorized Credential object.
+        return credential;
     }
-
 
 
 
     public static boolean sendEmail(String to, String subject, String body) {
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
-
-            GoogleCredentials googleCredentials = getGoogleCredentials();
-            Gmail service = new Gmail.Builder(HTTP_TRANSPORT, JSON_FACTORY, new HttpCredentialsAdapter(googleCredentials))
-                    .setApplicationName(APPLICATION_NAME)
+            Gmail service = new Gmail.Builder(HTTP_TRANSPORT, GmailAuth.JSON_FACTORY, getCredentials(HTTP_TRANSPORT))
+                    .setApplicationName(GmailAuth.APPLICATION_NAME)
                     .build();
-
             MimeMessage email = createEmail(to, "me", subject, body);
 
             Message message = createMessageWithEmail(email);
@@ -87,11 +88,10 @@ public class GmailAuth {
             return true;
 
         } catch (Exception e) {
-            log.error("Error while sending email: {}", e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
-
 
     private static MimeMessage createEmail(String to, String from, String subject, String bodyText) throws MessagingException {
         Properties props = new Properties();
