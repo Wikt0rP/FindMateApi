@@ -43,7 +43,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/*",
                                 //TODO: remove city/all
-                                "/city/test").permitAll()
+                                "/city/test", "team/all").permitAll()
                         .requestMatchers("/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
