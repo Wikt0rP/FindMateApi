@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,7 +58,11 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "team_id")
     )
     @JsonManagedReference
-    private List<Team> teams;
+    private List<Team> teams = new ArrayList<>();
+
+    @OneToMany(mappedBy = "receiver", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Invitation> invitations;
 
 
     public User(String username, String email, String password, Role role) {
@@ -76,4 +81,8 @@ public class User {
         roles.add(role);
     }
 
+    public void addTeam(Team team) {
+        this.teams.add(team);
+        team.getUsers().add(this);
+    }
 }
