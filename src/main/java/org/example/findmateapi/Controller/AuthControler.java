@@ -55,7 +55,7 @@ public class AuthControler {
             @ApiResponse(responseCode = "200", description = "Email sent successfully"),
             @ApiResponse(responseCode = "400", description = "Email could not be sent")
     })
-    @PostMapping("/forgot-cha")
+    @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody String email){
         return authUserService.forgotPassword(email);
     }
