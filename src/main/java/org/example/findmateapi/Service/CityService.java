@@ -10,6 +10,7 @@ import org.example.findmateapi.Entity.City;
 import org.example.findmateapi.Entity.User;
 import org.example.findmateapi.Repository.CityRepository;
 import org.example.findmateapi.Request.GetCitiesInRadiusRequest;
+import org.example.findmateapi.Response.UserValidationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,12 +39,11 @@ public class CityService {
 
 
     public ResponseEntity<?> getCitiesInRadius(GetCitiesInRadiusRequest getCitiesInRadiusRequest, HttpServletRequest request){
-        HashMap<String, User> response = userComponent.getUserFromRequest(request);
-        if(!response.containsKey("OK")){
-            String error = response.keySet().stream().findFirst().orElse("Unknown error");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
+        if(!userValidation.getStatus().equals("OK")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
         }
-        User user = response.get("OK");
+        User user = userValidation.getUser();
 
         City city = getCityByName(getCitiesInRadiusRequest.getCity());
         if (city == null) {

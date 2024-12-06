@@ -7,6 +7,7 @@ import org.example.findmateapi.Entity.User;
 import org.example.findmateapi.Repository.TeamRepository;
 import org.example.findmateapi.Repository.UserRepository;
 import org.example.findmateapi.Request.CreateTeamRequest;
+import org.example.findmateapi.Response.UserValidationResponse;
 import org.example.findmateapi.Security.Jwt.JwtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,12 +33,11 @@ public class TeamService {
     private final Logger logger = LoggerFactory.getLogger(TeamService.class);
 
     public ResponseEntity<?> createTeam(CreateTeamRequest createTeamRequest, HttpServletRequest request) {
-        HashMap<String, User> response = userComponent.getUserFromRequest(request);
-        if(!response.containsKey("OK")){
-            String error = response.keySet().stream().findFirst().orElse("Unknown error");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
+        if(!userValidation.getStatus().equals("OK")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
         }
-        User user = response.get("OK");
+        User user = userValidation.getUser();
 
         try{
             Team team = new Team(createTeamRequest.getTeamName(), user);

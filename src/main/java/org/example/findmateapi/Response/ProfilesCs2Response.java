@@ -1,17 +1,15 @@
 package org.example.findmateapi.Response;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.findmateapi.Entity.Cs2Profile;
-import org.example.findmateapi.Entity.UserProfiles;
 
 //@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class ProfilesResponse {
+public class ProfilesCs2Response {
 
     private Long userId;
     private String username;
@@ -21,7 +19,7 @@ public class ProfilesResponse {
     private Cs2Profile cs2Profile;
 
 
-    public ProfilesResponse(Long userId, String username, String email, Cs2Profile cs2Profile) {
+    public ProfilesCs2Response(Long userId, String username, String email, Cs2Profile cs2Profile) {
         this.userId = userId;
         this.username = username;
         this.email = email;
