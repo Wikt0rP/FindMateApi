@@ -9,6 +9,7 @@ import org.example.findmateapi.Repository.InvitationRepository;
 import org.example.findmateapi.Repository.TeamRepository;
 import org.example.findmateapi.Repository.UserRepository;
 import org.example.findmateapi.Request.SendInvitationRequest;
+import org.example.findmateapi.Response.UserValidationResponse;
 import org.example.findmateapi.Response.ViewInvitationResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,12 +42,11 @@ public class InvitationService {
 
     public ResponseEntity<?> createInvitation(SendInvitationRequest sendInvitationRequest, HttpServletRequest request) {
 
-        HashMap<String, User> response = userComponent.getUserFromRequest(request);
-        if(!response.containsKey("OK")){
-            String error = response.keySet().stream().findFirst().orElse("Unknown error");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
+        if(!userValidation.getStatus().equals("OK")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
         }
-        User sender = response.get("OK");
+        User user = userValidation.getUser();
 
 
 
@@ -74,12 +74,11 @@ public class InvitationService {
     }
 
     public ResponseEntity<?> viewInvitationsForUser(HttpServletRequest request){
-        HashMap<String, User> response = userComponent.getUserFromRequest(request);
-        if(!response.containsKey("OK")){
-            String error = response.keySet().stream().findFirst().orElse("Unknown error");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
+        if(!userValidation.getStatus().equals("OK")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
         }
-        User receiver = response.get("OK");
+        User receiver = userValidation.getUser();
 
         try{
             List<ViewInvitationResponse> responses = invitationRepository.findAllByReceiver(receiver).stream().map(invitation -> {
@@ -96,12 +95,11 @@ public class InvitationService {
     }
 
     public ResponseEntity<?> refuseInvitation(Long invId, HttpServletRequest request){
-        HashMap<String, User> response = userComponent.getUserFromRequest(request);
-        if(!response.containsKey("OK")){
-            String error = response.keySet().stream().findFirst().orElse("Unknown error");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
+        if(!userValidation.getStatus().equals("OK")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
         }
-        User receiver = response.get("OK");
+        User user = userValidation.getUser();
 
 
         Invitation invitation = invitationRepository.findById(invId).orElse(null);
@@ -121,12 +119,11 @@ public class InvitationService {
 
     @Transactional
     public ResponseEntity<?> acceptInvitation(Long invId, HttpServletRequest request){
-        HashMap<String, User> response = userComponent.getUserFromRequest(request);
-        if(!response.containsKey("OK")){
-            String error = response.keySet().stream().findFirst().orElse("Unknown error");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
+        if(!userValidation.getStatus().equals("OK")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
         }
-        User receiver = response.get("OK");
+        User receiver = userValidation.getUser();
 
         Invitation invitation = invitationRepository.findById(invId).orElse(null);
         if(invitation == null){

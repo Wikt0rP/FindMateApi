@@ -28,8 +28,8 @@ public class UserProfiles {
     private FaceitProfile faceitProfile;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "riot_profile_id", referencedColumnName = "id")
-    private RiotProfile riotProfile;
+    @JoinColumn(name = "lol_profile_id", referencedColumnName = "id")
+    private LolProfile lolProfile;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "steam_profile_id", referencedColumnName = "id")

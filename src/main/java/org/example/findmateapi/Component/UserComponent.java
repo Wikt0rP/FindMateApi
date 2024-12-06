@@ -2,11 +2,11 @@ package org.example.findmateapi.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.findmateapi.Entity.User;
+import org.example.findmateapi.Entity.UserProfiles;
 import org.example.findmateapi.Repository.UserRepository;
+import org.example.findmateapi.Response.UserValidationResponse;
 import org.example.findmateapi.Security.Jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -32,27 +32,33 @@ public class UserComponent {
      * "User is not active" + User<br>
      * "OK" + User<br>
      */
-    public HashMap<String, User> getUserFromRequest(HttpServletRequest request){
+    public UserValidationResponse getUserFromRequest(HttpServletRequest request){
         String token = JwtUtils.getJwtFromRequest(request);
-        HashMap<String, User> response = new HashMap<>();
+
         if(token == null || !jwtUtils.validateToken(token)){
-            response.put("Can not validate user", null);
-            return response;
+            return new UserValidationResponse("Can not validate user", null);
         }
+
         User user = getUserFromToken(token);
         if(user == null){
-            response.put("Cannot find user", null);
-            return response;
+            return new UserValidationResponse("Cannot find user", null);
         }
 
         if(!user.isActive()){
-            response.put("User is not active", user);
+            return new UserValidationResponse("User is not active", user);
         }
-        else{
-            response.put("OK", user);
-        }
-        return response;
 
+        return new UserValidationResponse("OK", user);
+
+
+
+    }
+
+    public void createUserProfiles(User user){
+        UserProfiles userProfiles = new UserProfiles();
+        userProfiles.setUser(user);
+        user.setUserProfiles(userProfiles);
+        userRepository.save(user);
     }
 
     @Deprecated
@@ -63,5 +69,7 @@ public class UserComponent {
         }
         return userRepository.findByUsername(username).orElse(null);
     }
+
+
 
 }
