@@ -12,7 +12,8 @@ import org.example.findmateapi.Request.CreateCs2ProfileRequest;
 import org.example.findmateapi.Request.FilterCs2ProfilesRequest;
 import org.example.findmateapi.Request.UpdateCs2ProfileRequest;
 import org.example.findmateapi.Response.ProfilesFullResponse;
-import org.example.findmateapi.Response.ProfilesResponse;
+import org.example.findmateapi.Response.ProfilesCs2Response;
+import org.example.findmateapi.Response.UserValidationResponse;
 import org.example.findmateapi.Security.Jwt.JwtUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
@@ -47,12 +46,11 @@ public class Cs2ProfileService {
 
     public ResponseEntity<?> createCs2Profile(CreateCs2ProfileRequest createCs2ProfileRequest, HttpServletRequest request) {
 
-        HashMap<String, User> response = userComponent.getUserFromRequest(request);
-        if(!response.containsKey("OK")){
-            String error = response.keySet().stream().findFirst().orElse("Unknown error");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
+        if(!userValidation.getStatus().equals("OK")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
         }
-        User user = response.get("OK");
+        User user = userValidation.getUser();
 
 
         try{
@@ -79,14 +77,13 @@ public class Cs2ProfileService {
     }
 
     public ResponseEntity<?> refreshCs2Profile(HttpServletRequest request){
-        HashMap<String, User> response = userComponent.getUserFromRequest(request);
-        if(!response.containsKey("OK")){
-            String error = response.keySet().stream().findFirst().orElse("Unknown error");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
+        if(!userValidation.getStatus().equals("OK")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
         }
-        User user = response.get("OK");
+        User user = userValidation.getUser();
 
-        Cs2Profile cs2Profile = cs2ProfileRepository.findByUserProfiles(user.getUserProfiles()).orElse(null);
+        Cs2Profile cs2Profile = findCs2ProfileByUser(user);
         if(cs2Profile == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find Cs2 Profile");
         }else{
@@ -97,12 +94,11 @@ public class Cs2ProfileService {
     }
 
     public ResponseEntity<?> searchCs2Profiles(FilterCs2ProfilesRequest filterCs2ProfilesRequest, HttpServletRequest request){
-        HashMap<String, User> responseUser = userComponent.getUserFromRequest(request);
-        if(!responseUser.containsKey("OK")){
-            String error = responseUser.keySet().stream().findFirst().orElse("Unknown error");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
+        if(!userValidation.getStatus().equals("OK")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
         }
-        User user = responseUser.get("OK");
+        User user = userValidation.getUser();
 
         List<Cs2Profile> cs2Profiles = cs2ProfileRepository.filterCs2Profiles(filterCs2ProfilesRequest);
         if(cs2Profiles == null){
@@ -117,7 +113,7 @@ public class Cs2ProfileService {
                 }
                 return ResponseEntity.status(HttpStatus.OK).body(response);
             }
-            List<ProfilesResponse> response = createResponse(cs2Profiles);
+            List<ProfilesCs2Response> response = createResponse(cs2Profiles);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }catch (Exception e){
             logger.error("Error:    CAN NOT CREATE RESPONSE       {}", e.getMessage());
@@ -128,12 +124,11 @@ public class Cs2ProfileService {
     }
 
     public ResponseEntity<?> updateCs2Profile(UpdateCs2ProfileRequest updateRequest, HttpServletRequest request){
-        HashMap<String, User> response = userComponent.getUserFromRequest(request);
-        if(!response.containsKey("OK")){
-            String error = response.keySet().stream().findFirst().orElse("Unknown error");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
+        if(!userValidation.getStatus().equals("OK")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
         }
-        User user = response.get("OK");
+        User user = userValidation.getUser();
 
         Cs2Profile cs2Profile = findCs2ProfileByUser(user);
         if(cs2Profile == null){
@@ -167,8 +162,8 @@ public class Cs2ProfileService {
         userRepository.save(user);
     }
 
-    private List<ProfilesResponse> createResponse(List<Cs2Profile> profilescs2){
-        List<ProfilesResponse> response = new ArrayList<>();
+    private List<ProfilesCs2Response> createResponse(List<Cs2Profile> profilescs2){
+        List<ProfilesCs2Response> response = new ArrayList<>();
 
         for(int i = 0; i < profilescs2.size(); i++){
             Cs2Profile tempcs2 = profilescs2.get(i);
@@ -183,7 +178,7 @@ public class Cs2ProfileService {
                 return null;
             }
 
-            response.add(new ProfilesResponse(user.getId(), user.getUsername(), user.getEmail(), tempcs2));
+            response.add(new ProfilesCs2Response(user.getId(), user.getUsername(), user.getEmail(), tempcs2));
 
         }
 

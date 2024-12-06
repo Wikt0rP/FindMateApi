@@ -5,10 +5,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
-import org.example.findmateapi.Request.CreateCs2ProfileRequest;
-import org.example.findmateapi.Request.FilterCs2ProfilesRequest;
-import org.example.findmateapi.Request.UpdateCs2ProfileRequest;
+import org.example.findmateapi.Request.*;
 import org.example.findmateapi.Service.Cs2ProfileService;
+import org.example.findmateapi.Service.LolProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +21,11 @@ public class ProfilesController {
 
     @Autowired
     private Cs2ProfileService cs2ProfileService;
+    @Autowired
+    private LolProfileService lolProfileService;
 
+
+    /// Cs2 Profile
     @PostMapping("/createCs2")
     @Operation(summary = "Create Cs2 Profile", description = "Create Cs2 Profile with given data, requires token")
     @ApiResponses({
@@ -78,4 +81,26 @@ public class ProfilesController {
         return cs2ProfileService.updateCs2Profile(updateCs2ProfileRequest, request);
     }
 
+
+
+    /// Lol Profile
+    @PostMapping("/createLol")
+    public ResponseEntity<?> createLolProfile(@RequestBody CreateLolProfileRequest createLolProfileRequest, HttpServletRequest request){
+        return lolProfileService.createLolProfile(createLolProfileRequest, request);
+    }
+
+    @PostMapping("/searchLol")
+    @Operation(summary = "Search Lol Profiles", description = "Search lol Profiles with filters<br>" +
+            "Requires token<br>" +
+            "If want to see all profiles (fullInfo = true) <br><br>"
+            )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Cs2 Profiles found successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Can not find UserProfiles"),
+            @ApiResponse(responseCode = "500", description = "Can not filter Cs2Profiles")
+    })
+    public ResponseEntity<?> searchLolProfiles(@RequestBody FilterLolProfilesRequest filterLolProfilesRequest, HttpServletRequest request){
+        return lolProfileService.searchLolProfiles(filterLolProfilesRequest, request);
+    }
 }
