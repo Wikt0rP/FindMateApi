@@ -85,6 +85,13 @@ public class ProfilesController {
 
     /// Lol Profile
     @PostMapping("/createLol")
+    @Operation(summary = "Create LoL Profile", description = "Create LoL Profile with given data, requires token")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "LoL Profile created successfully"),
+            @ApiResponse(responseCode = "404", description = "Team could not be created, UserProfiles not found"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Can not find UserProfiles and can not create UserProfiles")
+    })
     public ResponseEntity<?> createLolProfile(@RequestBody CreateLolProfileRequest createLolProfileRequest, HttpServletRequest request){
         return lolProfileService.createLolProfile(createLolProfileRequest, request);
     }
@@ -98,9 +105,35 @@ public class ProfilesController {
             @ApiResponse(responseCode = "200", description = "Cs2 Profiles found successfully"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Can not find UserProfiles"),
-            @ApiResponse(responseCode = "500", description = "Can not filter Cs2Profiles")
+            @ApiResponse(responseCode = "500", description = "Can not filter LoLProfiles")
     })
     public ResponseEntity<?> searchLolProfiles(@RequestBody FilterLolProfilesRequest filterLolProfilesRequest, HttpServletRequest request){
         return lolProfileService.searchLolProfiles(filterLolProfilesRequest, request);
+    }
+
+
+    @PutMapping("/updatelol")
+    @Operation(summary = "Update LoL Profile", description = "Update LoL Profile with given data<br>" +
+            " requires token")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "LoL Profile updated successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Can not find LoLProfile"),
+            @ApiResponse(responseCode = "500", description = "Can not update LoLProfile")
+    })
+    public ResponseEntity<?> updateLolProfile(@RequestBody UpdateLolProfileRequest updateLolProfileRequest, HttpServletRequest request){
+        return lolProfileService.updateLolProfile(updateLolProfileRequest, request);
+    }
+
+    @PostMapping("/refreshDateLol")
+    @Operation(summary = "Refresh LoL Profile", description = "Refresh LoL Profile, requires token." +
+            "This date is used to sort users when searching for teammastes (newest first)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "LoL Profile date refreshed successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "Can not find LoLProfile or UserProfiles")
+    })
+    public ResponseEntity<?> refreshDateLol(HttpServletRequest request){
+        return lolProfileService.refreshLolProfile(request);
     }
 }

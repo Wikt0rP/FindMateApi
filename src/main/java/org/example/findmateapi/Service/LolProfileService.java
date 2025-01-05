@@ -11,6 +11,7 @@ import org.example.findmateapi.Repository.UserProfilesRepository;
 import org.example.findmateapi.Repository.UserRepository;
 import org.example.findmateapi.Request.CreateLolProfileRequest;
 import org.example.findmateapi.Request.FilterLolProfilesRequest;
+import org.example.findmateapi.Request.UpdateLolProfileRequest;
 import org.example.findmateapi.Response.ProfilesCs2Response;
 import org.example.findmateapi.Response.ProfilesFullResponse;
 import org.example.findmateapi.Response.ProfilesLolResponse;
@@ -117,6 +118,32 @@ public class LolProfileService {
         }
     }
 
+    public ResponseEntity<?> updateLolProfile(UpdateLolProfileRequest updateLolProfileRequest, HttpServletRequest request){
+        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
+        if(!userValidation.getStatus().equals("OK")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
+        }
+        User user = userValidation.getUser();
+
+        LolProfile lolProfile = findLolProfileByUser(user);
+        if(lolProfile == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find LoL Profile");
+        }
+
+        try{
+            lolProfile.setRank(updateLolProfileRequest.getRank());
+            lolProfile.setSummonerName(updateLolProfileRequest.getSummonerName());
+            lolProfile.setRoleTop(updateLolProfileRequest.getRoleTop());
+            lolProfile.setRoleJungle(updateLolProfileRequest.getRoleJungle());
+            lolProfile.setRoleMid(updateLolProfileRequest.getRoleMid());
+            lolProfile.setRoleAdc(updateLolProfileRequest.getRoleAdc());
+            lolProfile.setRoleSupport(updateLolProfileRequest.getRoleSupport());
+            lolProfileRepository.save(lolProfile);
+            return ResponseEntity.status(HttpStatus.OK).body("Lol Profile updated successfully");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating LoL Profile");
+        }
+    }
 
 
     protected LolProfile findLolProfileByUser(User user){
