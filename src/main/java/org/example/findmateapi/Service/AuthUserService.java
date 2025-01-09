@@ -22,6 +22,7 @@ import org.example.findmateapi.Validation.PasswordValidation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -113,10 +114,14 @@ public class AuthUserService {
                         ERole role = ERole.valueOf(roleName);
                         return new Role(role);
                     }).collect(Collectors.toSet());
+
+            if(!userDetails.isActive()){
+                return ResponseEntity.badRequest().body("User not activated");
+            }
             return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
         }catch (Exception e){
             logger.error("Login failed for user {}: {}", loginRequest.getUsername(), e.getMessage());
-            return ResponseEntity.badRequest().body("Invalid credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Bad credentials");
         }
     }
 
