@@ -1,6 +1,7 @@
 package org.example.findmateapi.Controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.example.findmateapi.Service.LolProfileService;
 import org.example.findmateapi.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,5 +21,15 @@ public class UserController {
     @GetMapping("/info")
     public ResponseEntity<?> getUserInfo( HttpServletRequest request){
         return userService.userInfo(request);
+    }
+
+    @GetMapping("/lolprofile")
+    public ResponseEntity<?> getUserLolProfile(HttpServletRequest request){
+        return userService.userLolProfile(request);
+    }
+
+    @GetMapping("/csprofile")
+    public ResponseEntity<?> getUserCsProfile(HttpServletRequest request){
+        return userService.userCsProfile(request);
     }
 }
