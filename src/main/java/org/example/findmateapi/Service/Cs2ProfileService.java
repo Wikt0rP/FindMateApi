@@ -63,7 +63,7 @@ public class Cs2ProfileService {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already has a Cs2 Profile");
             }
 
-            Cs2Profile cs2Profile = new Cs2Profile(userProfiles, createCs2ProfileRequest.getPrimeRank());
+            Cs2Profile cs2Profile = new Cs2Profile(userProfiles, createCs2ProfileRequest.getPrimeRank(), createCs2ProfileRequest.getSteamLink());
             cs2ProfileRepository.save(cs2Profile);
 
             userProfiles.setCs2Profile(cs2Profile);
@@ -111,6 +111,7 @@ public class Cs2ProfileService {
                 if(response == null){
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error creating response");
                 }
+
                 return ResponseEntity.status(HttpStatus.OK).body(response);
             }
             List<ProfilesCs2Response> response = createResponse(cs2Profiles);
@@ -137,6 +138,7 @@ public class Cs2ProfileService {
 
         try {
             cs2Profile.setPrimeRank(updateRequest.getPrimeRank());
+            cs2Profile.setSteamLink(updateRequest.getSteamLink());
             cs2ProfileRepository.save(cs2Profile);
             return ResponseEntity.status(HttpStatus.OK).body("Cs2 Profile updated successfully");
         }catch (Exception e){

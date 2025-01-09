@@ -12,4 +12,5 @@ import lombok.Setter;
 public class UpdateCs2ProfileRequest {
 
         private Integer primeRank;
+        private String steamLink;
 }

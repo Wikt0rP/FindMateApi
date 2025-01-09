@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +83,7 @@ public class LolProfileService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lol profile not found");
         }
         try{
+            lolProfile.setLastRefreshed(LocalDateTime.now());
             lolProfileRepository.save(lolProfile);
             return ResponseEntity.ok("Lol profile refreshed successfully");
         }catch (Exception e){
@@ -111,6 +113,8 @@ public class LolProfileService {
                 return ResponseEntity.status(HttpStatus.OK).body(response);
             }
             List<ProfilesLolResponse> response = createResponse(lolProfiles);
+            assert response != null;
+            response.sort((a, b) -> b.getLolProfile().getLastRefreshed().compareTo(a.getLolProfile().getLastRefreshed()));
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }catch (Exception e){
             logger.error("Error creating response: {}", e.getMessage());
@@ -138,6 +142,7 @@ public class LolProfileService {
             lolProfile.setRoleMid(updateLolProfileRequest.getRoleMid());
             lolProfile.setRoleAdc(updateLolProfileRequest.getRoleAdc());
             lolProfile.setRoleSupport(updateLolProfileRequest.getRoleSupport());
+            lolProfile.setOpggLink(updateLolProfileRequest.getOpggLink());
             lolProfileRepository.save(lolProfile);
             return ResponseEntity.status(HttpStatus.OK).body("Lol Profile updated successfully");
         }catch (Exception e){
@@ -161,6 +166,7 @@ public class LolProfileService {
         lolProfile.setRoleMid(createLolProfileRequest.getRoleMid());
         lolProfile.setRoleAdc(createLolProfileRequest.getRoleAdc());
         lolProfile.setRoleSupport(createLolProfileRequest.getRoleSupport());
+        lolProfile.setOpggLink(createLolProfileRequest.getOpggLink());
         return lolProfile;
     }
 

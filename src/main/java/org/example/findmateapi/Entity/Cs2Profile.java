@@ -25,16 +25,17 @@ public class Cs2Profile {
     @JsonBackReference
     private UserProfiles userProfiles;
 
-
+    private String steamLink;
 
     private Integer primeRank;
 
     //Last time player was looking to play / created a profile
     private LocalDateTime lastRefreshed;
 
-    public Cs2Profile(UserProfiles userProfiles, Integer primeRank) {
+    public Cs2Profile(UserProfiles userProfiles, Integer primeRank, String steamLink) {
         this.userProfiles = userProfiles;
         this.primeRank = primeRank;
+        this.steamLink = steamLink;
         this.lastRefreshed = LocalDateTime.now();
     }
     public Cs2Profile(UserProfiles userProfiles){

@@ -17,4 +17,5 @@ public class CreateLolProfileRequest {
     private Boolean roleMid;
     private Boolean roleAdc;
     private Boolean roleSupport;
+    private String opggLink;
 }
