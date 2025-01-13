@@ -1,27 +1,26 @@
 package org.example.findmateapi.Entity;
 
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class SteamProfile {
-
+@Getter
+@Setter
+public class Sport {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(mappedBy = "steamProfile")
-    @JsonBackReference(value = "userprofiles-steamprofile")
-    private UserProfiles userProfiles;
+    private String name;
 
-    private String steamId;
-
-
-
-
+    @ManyToMany(mappedBy = "sports")
+    private Set<SportProfile> sportProfiles = new HashSet<>();
 }
