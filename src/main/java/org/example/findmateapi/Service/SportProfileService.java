@@ -9,7 +9,6 @@ import org.example.findmateapi.Entity.*;
 import org.example.findmateapi.Repository.SportProfileRepository;
 import org.example.findmateapi.Repository.UserProfilesRepository;
 import org.example.findmateapi.Repository.UserRepository;
-import org.example.findmateapi.Request.AddSportRequest;
 import org.example.findmateapi.Request.CreateSportProfileRequest;
 import org.example.findmateapi.Request.FilterSportProfilesRequest;
 import org.example.findmateapi.Response.ProfileSportResponse;
@@ -85,26 +84,6 @@ public class SportProfileService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sport profile could not be refreshed");
         }
     }
-    public ResponseEntity<?> addSport(HttpServletRequest request, AddSportRequest addSportRequest) {
-        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
-        if (!userValidation.getStatus().equals("OK")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
-        }
-        User user = userValidation.getUser();
-
-        SportProfile sportProfile = findSportProfileByUser(user);
-        if (sportProfile == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sport profile not found");
-        }
-        try {
-            sportProfile.addSport(addSportRequest.getSport());
-            sportProfileRepository.save(sportProfile);
-            return ResponseEntity.ok("Sport added to profile successfully");
-        } catch (Exception e) {
-            logger.error("Error adding sport to profile: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Sport could not be added to profile");
-        }
-    }
 
 
     public ResponseEntity<?> searchSportProfiles(FilterSportProfilesRequest filterSportProfilesRequest, HttpServletRequest request) {
@@ -143,12 +122,12 @@ public class SportProfileService {
         
     }
 
+
     private List<ProfileSportResponse> createPartialResponse(List<SportProfile> matchedProfiles) {
         return matchedProfiles.stream()
-                .map(profile -> new ProfileSportResponse(profile.getId(), profile.getUserProfiles().getUser().getUsername(), profile.getSports(), profile.getCity()))
+                .map(profile -> new ProfileSportResponse(profile.getId(), profile.getUserProfiles().getUser().getUsername(), profile.getSport(), profile.getCity()))
                 .collect(Collectors.toList());
     }
-
     protected SportProfile findSportProfileByUser(User user) {
         UserProfiles userProfiles = userProfilesRepository.findByUser(user).orElse(null);
         if (userProfiles == null) {

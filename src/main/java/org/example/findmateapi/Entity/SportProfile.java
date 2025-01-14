@@ -29,25 +29,16 @@ public class SportProfile {
 
     private String city;
 
-    @ManyToMany
-    @JoinTable(
-            name = "sport_profile_sports",
-            joinColumns = @JoinColumn(name = "sport_profile_id"),
-            inverseJoinColumns = @JoinColumn(name = "sport_id")
-    )
 
-    private Set<Sport> sports = new HashSet<>();
+    private String sport;
 
     private LocalDateTime lastRefreshTime;
 
     public SportProfile(UserProfiles userProfiles, CreateSportProfileRequest createSportProfileRequest) {
         this.userProfiles = userProfiles;
         this.city = createSportProfileRequest.getCity();
-        this.sports.add(createSportProfileRequest.getSport());
+        this.sport = createSportProfileRequest.getSport();
         this.lastRefreshTime = LocalDateTime.now();
     }
 
-    public void addSport(Sport sport) {
-        this.sports.add(sport);
-    }
 }

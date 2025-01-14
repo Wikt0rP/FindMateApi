@@ -68,6 +68,16 @@ public class CityService {
                                 c.getLatitude(), c.getLongitude()) <= radius)
                 .toList();
     }
+    public List<String> getStringListOfCitiesInRadius(String city, Integer radius) {
+        City cityObj = getCityByName(city);
+        return cities.stream()
+                .filter(c ->
+                        calculateDistance(
+                                cityObj.getLatitude(), cityObj.getLongitude(),
+                                c.getLatitude(), c.getLongitude()) <= radius)
+                .map(City::getCity)
+                .toList();
+    }
 
     @PostConstruct
     public void init() {
