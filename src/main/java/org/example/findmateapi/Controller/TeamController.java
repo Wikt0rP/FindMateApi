@@ -12,7 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/team")
@@ -42,6 +45,10 @@ public class TeamController {
         return ResponseEntity.ok(teams);
     }
 
+    @PostMapping("/remove/{teamId}")
+    public ResponseEntity<?> removwFromTeam(@PathVariable Long teamId, HttpServletRequest request){
+        return teamService.deleteUser(teamId, request);
+    }
 
 }
 

@@ -14,5 +14,5 @@ public class ProfileSportResponse {
     private String username;
     private String sports;
     private String city;
-
+    private String lastRefreshTime;
 }

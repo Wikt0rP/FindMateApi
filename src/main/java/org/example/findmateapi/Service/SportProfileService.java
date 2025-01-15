@@ -41,6 +41,29 @@ public class SportProfileService {
 
     private final Logger logger = LoggerFactory.getLogger(SportProfileService.class);
 
+    public ResponseEntity<?> updateSportProfile(CreateSportProfileRequest createSportProfileRequest, HttpServletRequest request){
+        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
+        if(!userValidation.getStatus().equals("OK")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
+        }
+        User user = userValidation.getUser();
+
+        SportProfile sportProfile = findSportProfileByUser(user);
+        if(sportProfile == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find Sport Profile");
+        }
+
+        try{
+            sportProfile.setSport(createSportProfileRequest.getSport());
+            sportProfile.setCity(createSportProfileRequest.getCity());
+            sportProfileRepository.save(sportProfile);
+            return ResponseEntity.status(HttpStatus.OK).body("Sport Profile updated successfully");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating Sport Profile");
+        }
+
+    }
+
     public ResponseEntity<?> createSportProfile(CreateSportProfileRequest createSportProfileRequest, HttpServletRequest request) {
         UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
         if (!userValidation.getStatus().equals("OK")) {
@@ -125,7 +148,7 @@ public class SportProfileService {
 
     private List<ProfileSportResponse> createPartialResponse(List<SportProfile> matchedProfiles) {
         return matchedProfiles.stream()
-                .map(profile -> new ProfileSportResponse(profile.getId(), profile.getUserProfiles().getUser().getUsername(), profile.getSport(), profile.getCity()))
+                .map(profile -> new ProfileSportResponse(profile.getId(), profile.getUserProfiles().getUser().getUsername(), profile.getSport(), profile.getCity(), profile.getLastRefreshTime().toString()))
                 .collect(Collectors.toList());
     }
     protected SportProfile findSportProfileByUser(User user) {

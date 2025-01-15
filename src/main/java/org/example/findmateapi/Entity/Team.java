@@ -51,6 +51,10 @@ public class Team {
         this.users.add(user);
     }
 
+    public void deleteUser(User user){
+        this.users.remove(user);
+    }
+
 
 
 }
