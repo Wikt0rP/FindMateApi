@@ -32,4 +32,9 @@ public class UserController {
     public ResponseEntity<?> getUserCsProfile(HttpServletRequest request){
         return userService.userCsProfile(request);
     }
+
+    @GetMapping("/sportprofile")
+    public ResponseEntity<?> getUserSportProfile(HttpServletRequest request){
+        return userService.userSportProfile(request);
+    }
 }

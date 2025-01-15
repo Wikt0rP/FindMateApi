@@ -115,9 +115,9 @@ public class AuthUserService {
                         return new Role(role);
                     }).collect(Collectors.toSet());
 
-            if(!userDetails.isActive()){
-                return ResponseEntity.badRequest().body("User not activated");
-            }
+//            if(!userDetails.isActive()){
+//                return ResponseEntity.ok("User not activated");
+//            }
             return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername(), userDetails.getEmail(), roles));
         }catch (Exception e){
             logger.error("Login failed for user {}: {}", loginRequest.getUsername(), e.getMessage());

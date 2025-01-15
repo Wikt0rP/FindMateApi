@@ -55,7 +55,7 @@ public class InvitationService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Team not found");
         }
 
-        User receiver = userRepository.findByEmail(sendInvitationRequest.getEmailReceiver()).orElse(null);
+        User receiver = userRepository.findByUsername(sendInvitationRequest.getEmailReceiver()).orElse(null);
         if(receiver == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }

@@ -49,4 +49,10 @@ public class SportProfileController {
         List<SportProfile> profiles = sportProfileRepository.findAll();
         return ResponseEntity.ok(profiles);
     }
+
+    @PutMapping("/update")
+    @Operation(summary = "Update user Sport Profile", description = "Update Sport Profile")
+    public ResponseEntity<?> updateSportProfile(@RequestBody CreateSportProfileRequest createSportProfileRequest, HttpServletRequest request){
+        return sportProfileService.updateSportProfile(createSportProfileRequest, request);
+    }
 }
