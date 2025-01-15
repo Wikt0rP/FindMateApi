@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateLolProfileRequest {
+public class UpdateLolProfileRequest {
     private Integer rank;
     private String summonerName;
     private Boolean roleTop;

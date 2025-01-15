@@ -11,6 +11,7 @@ import org.example.findmateapi.Repository.UserProfilesRepository;
 import org.example.findmateapi.Repository.UserRepository;
 import org.example.findmateapi.Request.CreateLolProfileRequest;
 import org.example.findmateapi.Request.FilterLolProfilesRequest;
+import org.example.findmateapi.Request.UpdateLolProfileRequest;
 import org.example.findmateapi.Response.ProfilesCs2Response;
 import org.example.findmateapi.Response.ProfilesFullResponse;
 import org.example.findmateapi.Response.ProfilesLolResponse;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,6 +83,7 @@ public class LolProfileService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lol profile not found");
         }
         try{
+            lolProfile.setLastRefreshed(LocalDateTime.now());
             lolProfileRepository.save(lolProfile);
             return ResponseEntity.ok("Lol profile refreshed successfully");
         }catch (Exception e){
@@ -110,6 +113,8 @@ public class LolProfileService {
                 return ResponseEntity.status(HttpStatus.OK).body(response);
             }
             List<ProfilesLolResponse> response = createResponse(lolProfiles);
+            assert response != null;
+            response.sort((a, b) -> b.getLolProfile().getLastRefreshed().compareTo(a.getLolProfile().getLastRefreshed()));
             return ResponseEntity.status(HttpStatus.OK).body(response);
         }catch (Exception e){
             logger.error("Error creating response: {}", e.getMessage());
@@ -117,6 +122,33 @@ public class LolProfileService {
         }
     }
 
+    public ResponseEntity<?> updateLolProfile(UpdateLolProfileRequest updateLolProfileRequest, HttpServletRequest request){
+        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
+        if(!userValidation.getStatus().equals("OK")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
+        }
+        User user = userValidation.getUser();
+
+        LolProfile lolProfile = findLolProfileByUser(user);
+        if(lolProfile == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cannot find LoL Profile");
+        }
+
+        try{
+            lolProfile.setRank(updateLolProfileRequest.getRank());
+            lolProfile.setSummonerName(updateLolProfileRequest.getSummonerName());
+            lolProfile.setRoleTop(updateLolProfileRequest.getRoleTop());
+            lolProfile.setRoleJungle(updateLolProfileRequest.getRoleJungle());
+            lolProfile.setRoleMid(updateLolProfileRequest.getRoleMid());
+            lolProfile.setRoleAdc(updateLolProfileRequest.getRoleAdc());
+            lolProfile.setRoleSupport(updateLolProfileRequest.getRoleSupport());
+            lolProfile.setOpggLink(updateLolProfileRequest.getOpggLink());
+            lolProfileRepository.save(lolProfile);
+            return ResponseEntity.status(HttpStatus.OK).body("Lol Profile updated successfully");
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error updating LoL Profile");
+        }
+    }
 
 
     protected LolProfile findLolProfileByUser(User user){
@@ -134,6 +166,7 @@ public class LolProfileService {
         lolProfile.setRoleMid(createLolProfileRequest.getRoleMid());
         lolProfile.setRoleAdc(createLolProfileRequest.getRoleAdc());
         lolProfile.setRoleSupport(createLolProfileRequest.getRoleSupport());
+        lolProfile.setOpggLink(createLolProfileRequest.getOpggLink());
         return lolProfile;
     }
 

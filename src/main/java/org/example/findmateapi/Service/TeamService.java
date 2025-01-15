@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.Optional;
 
 @Service
 public class TeamService {
@@ -49,7 +49,37 @@ public class TeamService {
             logger.error("Error creating team: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Team could not be created");
         }
+    }
 
+    public ResponseEntity<?> deleteUser(Long teamId, HttpServletRequest request){
+        UserValidationResponse userValidation = userComponent.getUserFromRequest(request);
+        if(!userValidation.getStatus().equals("OK")){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(userValidation.getStatus());
+        }
+        User user = userValidation.getUser();
+
+        Optional<Team> teamOptional = teamRepository.findTeamById(teamId);
+
+        if (!teamOptional.isPresent()) {
+            throw new IllegalArgumentException("Zespół nie istnieje");
+        }
+
+        Team team = teamOptional.get();
+        user.getTeams().remove(team);
+        userRepository.save(user);
+
+        return ResponseEntity.ok("działa");
+    }
+
+
+
+    public ResponseEntity<?> getTeamUsers(Long teamId){
+        Team team = teamRepository.findTeamById(teamId)
+                .orElse(null);
+        if(team != null){
+            return ResponseEntity.ok(team.getUsers());
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Team not found");
     }
 
 }

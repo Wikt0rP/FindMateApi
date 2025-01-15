@@ -28,6 +28,9 @@ public class WebSecurityConfig {
     private CustomOAuth2UserService customOAuth2UserService;
 
     @Autowired
+    private AuthTokenFilter authTokenFilter;
+
+    @Autowired
     PasswordEncoderConfig passwordEncoderConfig;
 
     @Bean
@@ -37,24 +40,32 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2SuccessHandler customOAuth2SuccessHandler, AuthTokenFilter authTokenFilter) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2SuccessHandler customOAuth2SuccessHandler) throws Exception {
+        http
+                .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/*",
-                                //TODO: remove city/all
-                                "/city/test", "team/all").permitAll()
-                        .requestMatchers("/swagger-ui/**",
+                        .requestMatchers(
+                                "/auth/*",
+                                "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
-                                "/swagger-ui/index.html",
-                                "/error").permitAll()
-                        .requestMatchers("/profile/searchCs2").authenticated()
+                                "/index",
+                                "/images/**",
+                                "/css/**",
+                                "/registration",
+                                "/login",
+                                "/error"
+                        ).permitAll()
+                        .requestMatchers("/user-dashboard").authenticated()
                         .anyRequest().authenticated())
                 .exceptionHandling(e -> e.authenticationEntryPoint(authenticationJwtTokenFilter()))
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/auth/google").userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .loginPage("/auth/google")
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler(customOAuth2SuccessHandler));
+
+        // Dodajemy filtr JWT
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -72,5 +83,4 @@ public class WebSecurityConfig {
         provider.setPasswordEncoder(passwordEncoderConfig.passwordEncoder());
         return provider;
     }
-
 }

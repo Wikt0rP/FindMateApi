@@ -48,6 +48,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     }
 
     private String getTokenFromRequest(HttpServletRequest request) {
-        return JwtUtils.getJwtFromRequest(request);
+        // Wydobycie tokena z nagłówka 'Authorization'
+        String bearerToken = request.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);  // Usuwamy "Bearer " z początku
+        }
+        return null;
     }
 }

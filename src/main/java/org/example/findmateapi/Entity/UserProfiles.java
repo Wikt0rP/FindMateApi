@@ -20,32 +20,36 @@ public class UserProfiles {
     private Long id;
 
     @OneToOne(mappedBy = "userProfiles")
-    @JsonBackReference
+    @JsonBackReference(value = "user-userprofiles")
     private User user;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "faceit_profile_id", referencedColumnName = "id")
+    @JsonManagedReference(value = "userprofiles-faceitprofile")
     private FaceitProfile faceitProfile;
+
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "lol_profile_id", referencedColumnName = "id")
+    @JsonManagedReference(value = "userprofiles-lolprofile")
     private LolProfile lolProfile;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "steam_profile_id", referencedColumnName = "id")
+    @JsonManagedReference(value = "userprofiles-steamprofile")
     private SteamProfile steamProfile;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "cs2_profile_id", referencedColumnName = "id")
-    @JsonManagedReference
+    @JsonManagedReference(value = "userprofiles-cs2profile")
     private Cs2Profile cs2Profile;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "sport_profile_id", referencedColumnName = "id")
+    @JsonManagedReference(value = "userprofiles-sportprofile")
     private SportProfile sportProfile;
 
     public UserProfiles(User user) {
         this.user = user;
     }
-
 }

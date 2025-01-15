@@ -26,6 +26,7 @@ public class LolProfile {
 
     private Integer rank;
     private String summonerName;
+    private String opggLink;
     /** Ranks:
      *      IRON_I(4), IRON_II(3), IRON_III(2), IRON_IV(1),
      *      BRONZE_I(8), BRONZE_II(7), BRONZE_III(6), BRONZE_IV(5),

@@ -4,14 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.findmateapi.Entity.City;
+
+import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateCs2ProfileRequest {
-
-    private Integer primeRank;
-    private String steamLink;
+public class CreateSportProfileRequest {
+    private String sport;
+    private String city;
 
 }
